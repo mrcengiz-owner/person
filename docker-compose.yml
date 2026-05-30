@@ -23,8 +23,10 @@ services:
     env_file: .env
     environment:
       POSTGRES_HOST: db
-    ports:
-      - "${WEB_PORT:-8000}:8000"
+    # Coolify / Traefik Docker ağı üzerinden 8000'e yönlendirir; host portu açmayın
+    # (0.0.0.0:8000 zaten doluysa deploy patlar). Yerel erişim: docker-compose.override.yml
+    expose:
+      - "8000"
     depends_on:
       db:
         condition: service_healthy

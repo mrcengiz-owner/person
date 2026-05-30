@@ -38,7 +38,21 @@ DJANGO_SUPERUSER_PASSWORD=guclu-sifre
 DJANGO_SUPERUSER_EMAIL=admin@sirket.com
 ```
 
-Uygulama: `http://sunucu:8000` (veya `WEB_PORT` ile değiştirin)
+Uygulama: `http://sunucu:8000` — host portu için `cp docker-compose.override.example.yml docker-compose.override.yml` (`.env` içinde `WEB_PORT` isteğe bağlı).
+
+---
+
+## Coolify (Docker Compose)
+
+1. Build tipi: **Docker Compose**, dosya: `docker-compose.yml`
+2. **Environment Variables** (`.env.example` ile aynı isimler): `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, `DJANGO_ALLOWED_HOSTS`, `POSTGRES_*`
+3. Coolify → uygulama ayarları → **Port `8000`**, servis adı **`web`**
+4. Domain ekleyin; HTTPS Coolify proxy üzerinden gelir
+
+**Port çakışması (`Bind for 0.0.0.0:8000 failed`)**  
+Compose dosyasında host `ports` eşlemesi yoktur; sadece `expose: 8000`. Coolify konteyner ağından bağlanır. Eski başarısız deploy varsa **Redeploy** yeterli.
+
+Coolify’da ayrı PostgreSQL servisi kullanıyorsanız compose içindeki `db` servisini devre dışı bırakın ve `POSTGRES_HOST`’u Coolify DB internal hostname’i yapın.
 
 ---
 
@@ -139,7 +153,7 @@ cp .env.example .env
 | `DJANGO_DEBUG` | `0` üretimde |
 | `DJANGO_ALLOWED_HOSTS` | `alanadi.com,www.alanadi.com` |
 | `POSTGRES_*` | Veritabanı bağlantısı |
-| `WEB_PORT` | Dış port (varsayılan 8000) |
+| `WEB_PORT` | Sadece `docker-compose.override.yml` ile yerel host portu (varsayılan 8000) |
 
 ---
 

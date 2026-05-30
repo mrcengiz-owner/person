@@ -1,0 +1,20 @@
+<div class="mesai-mini-timeline{% if labeled %} mesai-mini-timeline-labeled{% endif %}{% if mesai.gece_vardiyasi %} mesai-timeline-gece{% endif %}">
+  {% if labeled %}
+  <div class="mesai-timeline-labels">
+    <span>00</span><span>06</span><span>12</span><span>18</span><span>24</span>
+  </div>
+  {% endif %}
+  <div class="mesai-timeline-track" role="img" aria-label="24 saatlik mesai çizelgesi: {{ mesai.aralik }}">
+    {% for seg in mesai.segmentler %}
+    <div
+      class="mesai-timeline-bar{% if forloop.counter > 1 %} mesai-timeline-bar-alt{% endif %}"
+      style="left: {{ seg.sol }}%; width: {{ seg.genislik }}%;"
+    ></div>
+    {% empty %}
+    <div class="mesai-timeline-bar mesai-timeline-bar-empty" style="width: 0;"></div>
+    {% endfor %}
+  </div>
+  {% if mesai.gece_vardiyasi and show_gece_hint %}
+  <p class="mesai-gece-hint">Gece vardiyası: çalışma süresi ertesi güne taşar</p>
+  {% endif %}
+</div>

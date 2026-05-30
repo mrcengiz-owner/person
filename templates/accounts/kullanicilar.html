@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Kullanıcılar{% endblock %}
+{% block page_title %}Kullanıcı Yönetimi{% endblock %}
+
+{% block content %}
+<div class="detail-grid">
+  <section class="card card-form">
+    <div class="card-header"><h2>Yeni kullanıcı</h2></div>
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-grid">
+        {% for field in form %}
+        <div class="form-field {% if field.errors %}has-error{% endif %} full-width">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for e in field.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Kullanıcı oluştur</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card">
+    <div class="card-header"><h2>Yetkili kullanıcılar</h2></div>
+    <div class="table-wrap">
+      <table class="table-stack">
+        <thead>
+          <tr>
+            <th>Kullanıcı adı</th>
+            <th>Ad Soyad</th>
+            <th>Durum</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in kullanicilar %}
+          <tr>
+            <td data-label="Kullanıcı adı"><strong>{{ u.username }}</strong></td>
+            <td data-label="Ad Soyad">{{ u.get_full_name|default:"—" }}</td>
+            <td data-label="Durum">
+              {% if u.is_superuser %}<span class="badge badge-info">Yönetici</span>
+              {% elif u.is_active %}<span class="badge badge-success">Aktif</span>
+              {% else %}<span class="badge">Pasif</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

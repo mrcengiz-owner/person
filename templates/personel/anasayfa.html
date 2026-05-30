@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% load personel_extras %}
+
+{% block title %}Anasayfa · Personel Takip{% endblock %}
+{% block page_title %}Anasayfa{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+  <div class="stat-card">
+    <span class="stat-label">Aktif Personel</span>
+    <strong class="stat-value">{{ aktif_personel_sayisi }}</strong>
+  </div>
+  <div class="stat-card stat-warning">
+    <span class="stat-label">Maaş Uyarısı</span>
+    <strong class="stat-value">{{ maas_uyarilari|length }}</strong>
+    <small>Önümüzdeki {{ maas_uyari_gun|default:3 }} gün içinde</small>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Bugün</span>
+    <strong class="stat-value stat-date">{{ bugun|date:"d M Y" }}</strong>
+  </div>
+</div>
+
+{% if maas_uyarilari %}
+<section class="card card-alert">
+  <div class="card-header">
+    <h2>Maaşı Yaklaşan Personeller</h2>
+    <span class="badge badge-warning">{{ maas_uyarilari|length }} uyarı</span>
+  </div>
+  <div class="table-wrap">
+    <table class="table-stack">
+      <thead>
+        <tr>
+          <th>Personel</th>
+          <th>Maaş</th>
+          <th>Ödeme Tarihi</th>
+          <th>Kalan</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in maas_uyarilari %}
+        <tr>
+          <td class="td-stack-top" data-label="Personel"><strong>{{ u.personel.ad_soyad }}</strong></td>
+          <td data-label="Maaş">{{ u.personel.maas|para }}</td>
+          <td data-label="Ödeme Tarihi">{{ u.sonraki_maas|date:"d.m.Y" }}</td>
+          <td data-label="Kalan">
+            {% if u.kalan_gun == 0 %}
+              <span class="badge badge-danger">Bugün</span>
+            {% else %}
+              <span class="badge badge-warning">{{ u.kalan_gun }} gün</span>
+            {% endif %}
+          </td>
+          <td class="actions" data-label="İşlem">
+            <a href="{% url 'muhasebe_maas' %}?personel={{ u.personel.pk }}" class="btn btn-sm btn-primary">Maaş Öde</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% else %}
+<section class="card">
+  <p class="empty-state">Şu an yaklaşan maaş uyarısı yok. Her şey yolunda görünüyor.</p>
+</section>
+{% endif %}
+
+<section class="card">
+  <div class="card-header">
+    <h2>Son İşlemler</h2>
+    <a href="{% url 'muhasebe_islemler' %}" class="link">Tümünü gör</a>
+  </div>
+  {% if son_islemler %}
+  <div class="table-wrap">
+    <table class="table-stack">
+      <thead>
+        <tr>
+          <th>Tarih</th>
+          <th>Personel</th>
+          <th>Tip</th>
+          <th>Tutar</th>
+          <th>İşlemi yapan</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in son_islemler %}
+        <tr>
+          <td data-label="Tarih">{{ i.tarih|date:"d.m.Y" }}</td>
+          <td class="td-stack-top" data-label="Personel"><a href="{% url 'personel_detay' i.personel.pk %}">{{ i.personel.ad_soyad }}</a></td>
+          <td data-label="Tip">
+            {% if i.tip == 'avans' %}
+              <span class="badge badge-info">Avans</span>
+            {% else %}
+              <span class="badge badge-success">Maaş</span>
+            {% endif %}
+          </td>
+          <td data-label="Tutar">{{ i.tutar|para }}</td>
+          <td data-label="İşlemi yapan"><span class="audit-meta">{{ i|kayit_ozeti }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="empty-state">Henüz işlem kaydı yok.</p>
+  {% endif %}
+</section>
+
+<div class="quick-actions">
+  <a href="{% url 'personel_yeni' %}" class="btn btn-primary">+ Yeni Personel</a>
+  <a href="{% url 'muhasebe_avans' %}" class="btn btn-secondary">Avans Ver</a>
+  <a href="{% url 'muhasebe_maas' %}" class="btn btn-secondary">Maaş Öde</a>
+</div>
+{% endblock %}

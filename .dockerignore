@@ -1,0 +1,16 @@
+.venv
+venv
+__pycache__
+*.pyc
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+db.sqlite3
+staticfiles
+*.log
+.idea
+.vscode
+README.md
+DEPLOY.md

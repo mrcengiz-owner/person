@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ baslik }}{% endblock %}
+{% block page_title %}{{ baslik }}{% endblock %}
+
+{% block content %}
+<section class="card card-form card-form-personel">
+  <form method="post" novalidate id="personel-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <fieldset class="form-section">
+      <legend class="form-section-title">
+        <span class="form-section-icon">1</span>
+        Temel Bilgiler
+      </legend>
+      <div class="form-grid">
+        <div class="form-field {% if form.ad_soyad.errors %}has-error{% endif %} full-width">
+          <label for="{{ form.ad_soyad.id_for_label }}">{{ form.ad_soyad.label }}</label>
+          {{ form.ad_soyad }}
+          {% for e in form.ad_soyad.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-field {% if form.maas.errors %}has-error{% endif %}">
+          <label for="{{ form.maas.id_for_label }}">{{ form.maas.label }}</label>
+          {{ form.maas }}
+          {% for e in form.maas.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-field {% if form.maas_gunu.errors %}has-error{% endif %}">
+          <label for="{{ form.maas_gunu.id_for_label }}">{{ form.maas_gunu.label }}</label>
+          {{ form.maas_gunu }}
+          <small>Her ay ödeme günü (1–28)</small>
+          {% for e in form.maas_gunu.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-field {% if form.telefon.errors %}has-error{% endif %}">
+          <label for="{{ form.telefon.id_for_label }}">{{ form.telefon.label }}</label>
+          {{ form.telefon }}
+          {% for e in form.telefon.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section form-section-mesai">
+      <legend class="form-section-title">
+        <span class="form-section-icon">2</span>
+        Mesai Saatleri
+      </legend>
+      <p class="form-section-desc">
+        Çalışma süresi 24 saatlik periyotta tanımlanır. Çıkış saati girişten önce veya aynı ise mesai ertesi güne taşar
+        (ör. 22:00 giriş, 06:00 çıkış = 8 saat gece vardiyası).
+      </p>
+
+      <div class="mesai-presets" role="group" aria-label="Hazır mesai şablonları">
+        {% for giris, cikis, etiket, aciklama in mesai_onayarlari %}
+        <button
+          type="button"
+          class="mesai-preset-btn"
+          data-giris="{{ giris }}"
+          data-cikis="{{ cikis }}"
+          aria-pressed="false"
+        >
+          <strong>{{ etiket }}</strong>
+          <small>{{ aciklama }}</small>
+        </button>
+        {% endfor %}
+      </div>
+
+      <div class="mesai-picker">
+        <div class="mesai-time-card">
+          <label for="{{ form.mesai_giris.id_for_label }}" class="mesai-time-label">
+            <span class="mesai-time-icon mesai-time-icon-in" aria-hidden="true">↓</span>
+            Giriş Saati
+          </label>
+          {{ form.mesai_giris }}
+          {% for e in form.mesai_giris.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+
+        <div class="mesai-duration-badge" id="mesai-sure-badge" aria-live="polite">
+          <span class="mesai-duration-value" id="mesai-sure-text">—</span>
+          <small>günlük çalışma</small>
+        </div>
+
+        <div class="mesai-time-card">
+          <label for="{{ form.mesai_cikis.id_for_label }}" class="mesai-time-label">
+            <span class="mesai-time-icon mesai-time-icon-out" aria-hidden="true">↑</span>
+            Çıkış Saati
+          </label>
+          {{ form.mesai_cikis }}
+          {% for e in form.mesai_cikis.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+
+      <div class="mesai-timeline-preview" aria-hidden="true">
+        <div class="mesai-timeline-labels">
+          <span>00:00</span>
+          <span>06:00</span>
+          <span>12:00</span>
+          <span>18:00</span>
+          <span>24:00</span>
+        </div>
+        <div class="mesai-timeline-track" id="mesai-timeline-track"></div>
+        <p class="mesai-timeline-caption" id="mesai-timeline-caption">Mesai aralığı önizlemesi</p>
+      </div>
+    </fieldset>
+
+    <fieldset class="form-section">
+      <legend class="form-section-title">
+        <span class="form-section-icon">3</span>
+        Ek Bilgiler
+      </legend>
+      <div class="form-grid">
+        <div class="form-field full-width {% if form.notlar.errors %}has-error{% endif %}">
+          <label for="{{ form.notlar.id_for_label }}">{{ form.notlar.label }}</label>
+          {{ form.notlar }}
+          {% for e in form.notlar.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+        <div class="form-field full-width {% if form.aktif.errors %}has-error{% endif %}">
+          <label class="checkbox-label">
+            {{ form.aktif }}
+            <span>{{ form.aktif.label }} — listede görünsün ve işlem yapılabilsin</span>
+          </label>
+          {% for e in form.aktif.errors %}<span class="field-error">{{ e }}</span>{% endfor %}
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Kaydet</button>
+      <a href="{% url 'personel_liste' %}" class="btn btn-ghost">İptal</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/personel-form.js' %}"></script>
+{% endblock %}

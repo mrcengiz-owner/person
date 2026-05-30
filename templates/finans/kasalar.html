@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Kasalar{% endblock %}
+{% block page_title %}Kasalar{% endblock %}
+
+{% block content %}
+<section class="card card-placeholder">
+  <div class="placeholder-hero">
+    <span class="placeholder-icon" aria-hidden="true">🏦</span>
+    <h2>Kasalar</h2>
+    <p>
+      Nakit ve banka kasalarınızı, giriş-çıkış hareketlerini ve mutabakatlarla bağlantıyı
+      bu bölümde yöneteceğiz. Şablonunuzu ilettiğinizde yapı netleşecek.
+    </p>
+  </div>
+
+  <div class="placeholder-hint">
+    <h3>Şablonda olması beklenen bilgiler</h3>
+    <ul>
+      {% for alan in beklenen_alanlar %}
+      <li>{{ alan }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <p class="empty-state">
+    Kasa formatını mutabakat şablonuyla birlikte veya ayrı gönderebilirsiniz.
+  </p>
+</section>
+{% endblock %}

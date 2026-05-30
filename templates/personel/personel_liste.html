@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+{% load personel_extras %}
+
+{% block title %}Personel Listesi{% endblock %}
+{% block page_title %}Personel Listesi{% endblock %}
+
+{% block content %}
+<div class="liste-toolbar">
+  <a href="{% url 'personel_yeni' %}" class="btn btn-primary">+ Yeni Personel</a>
+  <div class="liste-search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm8.3 14.7-4.2-4.2a8 8 0 1 0-1.4 1.4l4.2 4.2 1.4-1.4Z" fill="currentColor"/></svg>
+    <input type="search" id="personel-search" placeholder="Personel ara..." autocomplete="off" aria-label="Personel ara">
+  </div>
+</div>
+
+<section class="card card-liste">
+  {% if personeller %}
+  <div class="liste-meta">
+    <span><strong id="personel-count">{{ personeller|length }}</strong> personel</span>
+    <span class="liste-hint">Detay için isme tıklayın</span>
+  </div>
+  <div class="table-wrap">
+    <table class="personel-table table-stack" id="personel-table">
+      <thead>
+        <tr>
+          <th>Personel</th>
+          <th>Maaş</th>
+          <th>Maaş Günü</th>
+          <th>Mesai</th>
+          <th>Sonraki Ödeme</th>
+          <th>Durum</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in personeller %}
+        <tr
+          class="personel-row {% if item.yaklasiyor %}row-warning{% endif %} {% if not item.personel.aktif %}row-inactive{% endif %}"
+          data-name="{{ item.personel.ad_soyad|lower }}"
+          data-search="{{ item.personel.ad_soyad|lower }} {{ item.personel.telefon }}"
+        >
+          <td class="td-stack-top" data-label="Personel">
+            <button
+              type="button"
+              class="personel-name-btn"
+              data-personel-modal
+              data-url="{% url 'personel_detay_modal' item.personel.pk %}"
+              data-title="{{ item.personel.ad_soyad }}"
+              aria-haspopup="dialog"
+            >
+              <span class="personel-avatar personel-avatar-sm" aria-hidden="true">{{ item.personel.ad_soyad|slice:":1"|upper }}</span>
+              <span class="personel-name-text">
+                <strong>{{ item.personel.ad_soyad }}</strong>
+                {% if item.personel.telefon %}<small>{{ item.personel.telefon }}</small>{% endif %}
+              </span>
+            </button>
+            {% if not item.personel.aktif %}<span class="badge">Pasif</span>{% endif %}
+          </td>
+          <td class="tabular-nums" data-label="Maaş">{{ item.personel.maas|para }}</td>
+          <td data-label="Maaş Günü">Ayın {{ item.personel.maas_gunu }}.</td>
+          <td data-label="Mesai">
+            <span class="mesai-badge-inline" title="{{ item.mesai.sure }}">{{ item.mesai.aralik }}</span>
+          </td>
+          <td class="tabular-nums" data-label="Sonraki Ödeme">
+            {% if item.sonraki_maas %}
+              {{ item.sonraki_maas|date:"d.m.Y" }}
+              {% if item.yaklasiyor %}
+                <span class="badge badge-warning">{{ item.kalan_gun }} gün</span>
+              {% endif %}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td data-label="Durum">
+            {% if item.yaklasiyor %}
+              <span class="badge badge-warning">Yaklaşıyor</span>
+            {% elif item.personel.aktif %}
+              <span class="badge badge-muted">Normal</span>
+            {% else %}
+              <span class="badge">Pasif</span>
+            {% endif %}
+          </td>
+          <td class="actions" data-label="İşlem">
+            <a href="{% url 'personel_duzenle' item.personel.pk %}" class="btn btn-sm btn-ghost" title="Düzenle">Düzenle</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="empty-state empty-search" id="empty-search" hidden>Aramanızla eşleşen personel bulunamadı.</p>
+  {% else %}
+  <p class="empty-state">Henüz personel eklenmemiş. <a href="{% url 'personel_yeni' %}">İlk personeli ekleyin</a>.</p>
+  {% endif %}
+</section>
+
+<div class="modal" id="personel-modal" hidden aria-hidden="true">
+  <div class="modal-backdrop" data-modal-close></div>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-loading" id="modal-loading">
+      <span class="spinner"></span>
+      <span>Yükleniyor…</span>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/personel-liste.js' %}"></script>
+{% endblock %}

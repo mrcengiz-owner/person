@@ -1,0 +1,24 @@
+{% extends "personel/islem_form_base.html" %}
+
+{% block form_audit %}
+<div class="audit-panel">
+  <p><strong>Orijinal kayıt</strong><br>{{ kayit_ozeti }}</p>
+  <p><strong>Son güncelleme</strong><br>{{ guncelleme_ozeti }}</p>
+  <p class="audit-meta">Bu kaydı güncellediğinizde «{{ user.get_full_name|default:user.username }}» olarak işlenecektir.</p>
+</div>
+{% endblock %}
+
+{% block form_extra %}
+<input type="hidden" name="next" value="{{ next }}">
+{% endblock %}
+
+{% block form_actions %}
+<div class="form-actions">
+  <button type="submit" class="btn btn-primary">Güncelle</button>
+  {% if next %}
+  <a href="{{ next }}" class="btn btn-ghost">İptal</a>
+  {% else %}
+  <a href="{% url 'muhasebe_islemler' %}" class="btn btn-ghost">İptal</a>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Mutabakatlar{% endblock %}
+{% block page_title %}Mutabakatlar{% endblock %}
+
+{% block content %}
+<section class="card card-placeholder">
+  <div class="placeholder-hero">
+    <span class="placeholder-icon" aria-hidden="true">📋</span>
+    <h2>Müşteri mutabakatları</h2>
+    <p>
+      Müşteriden alınan işlerin tutar, dönem ve ödeme durumunu burada takip edeceğiz.
+      Göndereceğiniz şablon formatına göre alanlar ve formlar tamamlanacak.
+    </p>
+  </div>
+
+  <div class="placeholder-hint">
+    <h3>Şablonda olması beklenen bilgiler</h3>
+    <ul>
+      {% for alan in beklenen_alanlar %}
+      <li>{{ alan }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <p class="empty-state">
+    Formatı (Excel, PDF veya örnek tablo ekran görüntüsü) paylaştığınızda bu sayfayı hemen dolduruyoruz.
+  </p>
+</section>
+{% endblock %}

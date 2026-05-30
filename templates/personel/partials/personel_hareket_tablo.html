@@ -1,0 +1,63 @@
+{% load personel_extras %}
+{% if islemler_gruplu %}
+<div class="hareket-table-wrap">
+  <table class="hareket-table table-stack">
+    <thead>
+      <tr>
+        <th scope="col">Tarih</th>
+        <th scope="col">Tip</th>
+        <th scope="col" class="col-num">Tutar</th>
+        <th scope="col">Açıklama</th>
+        <th scope="col">Kayıt</th>
+        <th scope="col" class="col-action"><span class="sr-only">İşlem</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for grup in islemler_gruplu %}
+      <tr class="hareket-group-row">
+        <td colspan="6">
+          <div class="hareket-group-cell">
+            <span class="hareket-group-title">{{ grup.etiket }}</span>
+            <span class="hareket-group-count">{{ grup.islem_sayisi }} işlem</span>
+            {% if grup.avans_toplam or grup.maas_toplam %}
+            <span class="hareket-group-tags">
+              {% if grup.avans_toplam %}<span class="grup-tag grup-avans">Avans {{ grup.avans_toplam|para }}</span>{% endif %}
+              {% if grup.maas_toplam %}<span class="grup-tag grup-maas">Maaş {{ grup.maas_toplam|para }}</span>{% endif %}
+            </span>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% for i in grup.islemler %}
+      <tr class="hareket-row hareket-row-{{ i.tip }}">
+        <td data-label="Tarih">
+          <time datetime="{{ i.tarih|date:'Y-m-d' }}" class="hareket-date">{{ i.tarih|date:"d.m.Y" }}</time>
+        </td>
+        <td data-label="Tip">
+          {% if i.tip == 'avans' %}
+          <span class="badge badge-info badge-pill">Avans</span>
+          {% else %}
+          <span class="badge badge-success badge-pill">Maaş</span>
+          {% endif %}
+        </td>
+        <td data-label="Tutar" class="col-num">
+          <strong class="hareket-amount">{{ i.tutar|para }}</strong>
+        </td>
+        <td data-label="Açıklama" class="hareket-desc-cell">
+          <span class="hareket-desc">{{ i.aciklama|default:"—" }}</span>
+        </td>
+        <td data-label="Kayıt" class="hareket-audit-cell">
+          <span class="audit-meta">{{ i|kayit_ozeti }}</span>
+        </td>
+        <td data-label="İşlem" class="col-action actions">
+          <a href="{% url 'islem_duzenle' i.pk %}{% if edit_next %}?next={{ edit_next|urlencode }}{% endif %}" class="btn btn-sm btn-ghost">Düzenle</a>
+        </td>
+      </tr>
+      {% endfor %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty-state">Henüz hareket kaydı yok.</p>
+{% endif %}

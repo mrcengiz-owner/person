@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}{{ baslik }}{% endblock %}
+{% block page_title %}{{ baslik }}{% endblock %}
+
+{% block content %}
+<section class="card card-form">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% block form_extra %}{% endblock %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% block form_audit %}{% endblock %}
+
+    <div class="form-grid">
+      {% for field in form %}
+      <div class="form-field {% if field.errors %}has-error{% endif %} full-width">
+        {% if field.is_hidden %}
+          {{ field }}
+        {% else %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    {% block form_actions %}
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Kaydet</button>
+      <a href="{% if iptal_url %}{% url iptal_url %}{% else %}{% url 'muhasebe_islemler' %}{% endif %}" class="btn btn-ghost">İptal</a>
+    </div>
+    {% endblock %}
+  </form>
+</section>
+{% endblock %}

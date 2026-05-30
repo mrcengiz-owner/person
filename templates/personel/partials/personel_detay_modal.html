@@ -1,0 +1,193 @@
+{% load personel_extras %}
+<div class="modal-panel personel-detail-panel" role="document">
+  <header class="modal-header personel-detail-header">
+    <div class="modal-title-group">
+      <span class="personel-avatar" aria-hidden="true">{{ personel.ad_soyad|slice:":1"|upper }}</span>
+      <div class="modal-title-text">
+        <h2 id="modal-title">{{ personel.ad_soyad }}</h2>
+        <ul class="modal-meta-chips" aria-label="Özet bilgiler">
+          <li>
+            <span class="meta-chip {% if personel.aktif %}meta-chip-ok{% else %}meta-chip-muted{% endif %}">
+              {% if personel.aktif %}Aktif{% else %}Pasif{% endif %}
+            </span>
+          </li>
+          <li><span class="meta-chip">Maaş günü: {{ personel.maas_gunu }}.</span></li>
+          <li><span class="meta-chip">{{ mesai.aralik }}</span></li>
+          <li><span class="meta-chip">Kayıt {{ personel.olusturulma|date:"d.m.Y" }}</span></li>
+        </ul>
+        <div class="modal-badges">
+          <span class="badge {{ odeme_durumu.sinif }}">{{ odeme_durumu.etiket }}</span>
+          {% if yaklasiyor %}
+          <span class="badge badge-warning">Maaş {{ kalan_gun }} gün içinde</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <button type="button" class="modal-close" aria-label="Kapat">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </header>
+
+  <div class="modal-body">
+    {% if yaklasiyor %}
+    <div class="alert alert-warning modal-alert personel-detail-alert">
+      Sonraki maaş: <strong>{{ sonraki_maas|date:"d.m.Y" }}</strong>
+      {% if kalan_gun == 0 %}— bugün ödeme günü{% else %}— {{ kalan_gun }} gün kaldı{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="detail-kpi-row" role="group" aria-label="Bu ay özeti">
+      <div class="detail-kpi">
+        <span class="detail-kpi-label">Brüt maaş</span>
+        <strong class="detail-kpi-value">{{ personel.maas|para }}</strong>
+      </div>
+      <div class="detail-kpi">
+        <span class="detail-kpi-label">Net ödenecek</span>
+        <strong class="detail-kpi-value">{{ ozet.net_beklenen|para }}</strong>
+      </div>
+      <div class="detail-kpi {% if odeme_durumu.kalan_odeme > 0 %}detail-kpi-warn{% endif %}">
+        <span class="detail-kpi-label">Kalan ödeme</span>
+        <strong class="detail-kpi-value">
+          {% if odeme_durumu.kalan_odeme > 0 %}{{ odeme_durumu.kalan_odeme|para }}{% else %}—{% endif %}
+        </strong>
+      </div>
+      <div class="detail-kpi">
+        <span class="detail-kpi-label">Bu ay avans</span>
+        <strong class="detail-kpi-value">{{ ozet.avans_toplam|para }}</strong>
+      </div>
+    </div>
+
+    <section class="modal-block">
+      <div class="modal-block-head">
+        <h3>{{ bu_ay_etiket }} — Finans</h3>
+      </div>
+
+      <div class="finance-bars">
+        <div class="finance-bar-item">
+          <div class="finance-bar-label">
+            <span>Avans kullanımı</span>
+            <strong>{{ ozet.avans_toplam|para }}</strong>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill progress-avans" style="width: {{ odeme_durumu.avans_oran }}%"></div>
+          </div>
+          <small>Maaşın %{{ odeme_durumu.avans_oran }}’i avans olarak verildi</small>
+        </div>
+        <div class="finance-bar-item">
+          <div class="finance-bar-label">
+            <span>Maaş ödeme ilerlemesi</span>
+            <strong>{{ ozet.maas_toplam|para }} / {{ ozet.net_beklenen|para }}</strong>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill progress-maas" style="width: {{ odeme_durumu.odeme_oran }}%"></div>
+          </div>
+          {% if odeme_durumu.kalan_odeme > 0 %}
+          <small>Kalan ödeme: <strong>{{ odeme_durumu.kalan_odeme|para }}</strong></small>
+          {% else %}
+          <small>Bu ay için ödeme tamamlandı</small>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="finance-grid finance-grid-compact">
+        <div class="finance-row">
+          <span>Ödenen maaş</span>
+          <strong class="text-success">{{ ozet.maas_toplam|para }}</strong>
+        </div>
+        <div class="finance-row finance-row-minus">
+          <span>Avans kesintisi</span>
+          <strong>− {{ ozet.avans_toplam|para }}</strong>
+        </div>
+        <div class="finance-row finance-row-total">
+          <span>Net ödenecek</span>
+          <strong>{{ ozet.net_beklenen|para }}</strong>
+        </div>
+        {% if odeme_durumu.kalan_odeme > 0 %}
+        <div class="finance-row finance-row-highlight">
+          <span>Ödenmesi gereken</span>
+          <strong>{{ odeme_durumu.kalan_odeme|para }}</strong>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="modal-block modal-block-split">
+      <div class="mini-card">
+        <h4>Geçen ay · {{ gecmis_ay_etiket }}</h4>
+        <ul class="mini-list">
+          <li><span>Avans</span><strong>{{ gecmis_ozet.avans_toplam|para }}</strong></li>
+          <li><span>Maaş ödemesi</span><strong>{{ gecmis_ozet.maas_toplam|para }}</strong></li>
+          <li><span>Net</span><strong>{{ gecmis_ozet.net_beklenen|para }}</strong></li>
+        </ul>
+      </div>
+      <div class="mini-card">
+        <h4>Tüm zamanlar</h4>
+        <ul class="mini-list">
+          <li><span>Toplam işlem</span><strong>{{ istatistik.toplam_islem }}</strong></li>
+          <li><span>{{ istatistik.avans_adet }} avans</span><strong>{{ istatistik.toplam_avans|para }}</strong></li>
+          <li><span>{{ istatistik.maas_adet }} maaş</span><strong>{{ istatistik.toplam_maas|para }}</strong></li>
+        </ul>
+        {% if istatistik.son_islem %}
+        <p class="mini-foot">Son: {{ istatistik.son_islem.tarih|date:"d.m.Y" }} · {{ istatistik.son_islem.get_tip_display }}</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="modal-block">
+      <div class="modal-block-head">
+        <h3>İletişim ve mesai</h3>
+      </div>
+      <dl class="info-grid info-grid-detail">
+        <div>
+          <dt>Telefon</dt>
+          <dd>{% if personel.telefon %}<a href="tel:{{ personel.telefon }}">{{ personel.telefon }}</a>{% else %}—{% endif %}</dd>
+        </div>
+        <div>
+          <dt>Sonraki maaş</dt>
+          <dd>{{ sonraki_maas|date:"d.m.Y" }}</dd>
+        </div>
+        <div>
+          <dt>Mesai</dt>
+          <dd><strong>{{ mesai.aralik }}</strong> <span class="text-muted-inline">({{ mesai.sure }})</span></dd>
+        </div>
+        <div class="info-grid-full">
+          <dt>Günlük çizelge</dt>
+          <dd>
+            {% include "personel/partials/mesai_timeline.html" with mesai=mesai labeled=True show_gece_hint=True %}
+          </dd>
+        </div>
+        {% if personel.notlar %}
+        <div class="info-grid-full">
+          <dt>Notlar</dt>
+          <dd class="detail-notes">{{ personel.notlar }}</dd>
+        </div>
+        {% endif %}
+      </dl>
+      <p class="detail-audit-line">
+        <span>{{ personel_olusturma }}</span>
+        <span class="detail-audit-sep">·</span>
+        <span>{{ personel_guncelleme }}</span>
+      </p>
+    </section>
+
+    <section class="modal-block">
+      <div class="modal-block-head">
+        <h3>Hareket geçmişi</h3>
+        {% if islemler_gruplu %}
+        <span class="modal-block-meta">{{ istatistik.toplam_islem }} kayıt</span>
+        {% endif %}
+      </div>
+
+      {% include "personel/partials/personel_hareket_tablo.html" with islemler_gruplu=islemler_gruplu %}
+    </section>
+  </div>
+
+  <footer class="modal-footer personel-detail-footer">
+    <a href="{% url 'personel_detay' personel.pk %}" class="btn btn-ghost btn-sm-link">Tam sayfa</a>
+    <div class="modal-footer-actions">
+      <a href="{% url 'personel_duzenle' personel.pk %}" class="btn btn-ghost">Düzenle</a>
+      <a href="{% url 'muhasebe_avans' %}?personel={{ personel.pk }}" class="btn btn-secondary">Avans</a>
+      <a href="{% url 'muhasebe_maas' %}?personel={{ personel.pk }}" class="btn btn-primary">Maaş öde</a>
+    </div>
+  </footer>
+</div>

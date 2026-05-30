@@ -1,0 +1,37 @@
+# Veriler postgres_data volume içinde kalır.
+# ASLA: docker compose down -v  (volume siler, tüm veri gider)
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-personel}
+      POSTGRES_USER: ${POSTGRES_USER:-personel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD .env dosyasında zorunlu}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-personel} -d ${POSTGRES_DB:-personel}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      POSTGRES_HOST: db
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Medya/yüklemeler kalıcı olsun (ileride kullanılırsa)
+      - app_media:/app/media
+
+volumes:
+  postgres_data:
+  app_media:

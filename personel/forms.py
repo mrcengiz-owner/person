@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 
 from .models import IslemTipi, MuhasebeIslem, Personel
@@ -45,11 +46,14 @@ class PersonelForm(forms.ModelForm):
 class MuhasebeIslemForm(forms.ModelForm):
     class Meta:
         model = MuhasebeIslem
-        fields = ["personel", "tip", "tutar", "tarih", "aciklama"]
+        fields = ["personel", "alici_adi", "tip", "tutar", "tarih", "aciklama"]
         widgets = {
             "tutar": forms.NumberInput(attrs={"step": "0.01", "min": "0.01"}),
             "tarih": forms.DateInput(attrs={"type": "date"}),
             "aciklama": forms.TextInput(attrs={"placeholder": "İsteğe bağlı not"}),
+            "alici_adi": forms.TextInput(
+                attrs={"placeholder": "Örn. ABC Tedarik, Kira, Yakıt"}
+            ),
         }
 
     def __init__(self, *args, tip=None, **kwargs):
@@ -60,11 +64,63 @@ class MuhasebeIslemForm(forms.ModelForm):
             )
         else:
             self.fields["personel"].queryset = Personel.objects.filter(aktif=True)
+        self.fields["personel"].required = False
         if tip:
             self.fields["tip"].initial = tip
             self.fields["tip"].widget = forms.HiddenInput()
         else:
             self.fields["tip"].widget = forms.Select()
+        effective_tip = self.instance.tip if self.instance.pk else tip
+        if not effective_tip and self.data:
+            effective_tip = self.data.get("tip")
+        if not effective_tip:
+            effective_tip = self.initial.get("tip")
+        self._tip_alanlarini_ayarla(effective_tip)
+
+    def _tip_alanlarini_ayarla(self, tip):
+        if tip in (IslemTipi.AVANS, IslemTipi.MAAS):
+            self.fields["personel"].required = True
+            self.fields["alici_adi"].widget = forms.HiddenInput()
+        elif tip == IslemTipi.MASRAF:
+            self.fields["personel"].required = False
+            self.fields["alici_adi"].label = "Alıcı / Firma (personel değilse)"
+
+    def clean(self):
+        cleaned = super().clean()
+        tip = cleaned.get("tip")
+        personel = cleaned.get("personel")
+        alici_adi = (cleaned.get("alici_adi") or "").strip()
+
+        if tip in (IslemTipi.AVANS, IslemTipi.MAAS):
+            if not personel:
+                raise ValidationError({"personel": "Avans ve maaş için personel seçin."})
+            cleaned["alici_adi"] = ""
+        elif tip == IslemTipi.MASRAF:
+            if not personel and not alici_adi:
+                raise ValidationError(
+                    "Masraf için personel seçin veya alıcı adı girin."
+                )
+            cleaned["alici_adi"] = alici_adi
+        return cleaned
+
+
+class OdemeKayitForm(MuhasebeIslemForm):
+    """Masraf, avans ve maaş ödemelerini tek formdan kaydeder."""
+
+    def __init__(self, *args, personel=None, **kwargs):
+        tip = kwargs.pop("tip", None)
+        super().__init__(*args, tip=tip, **kwargs)
+        if not self.instance.pk:
+            self.fields["tip"].widget = forms.Select(choices=IslemTipi.choices)
+            if tip:
+                self.fields["tip"].initial = tip
+                self._tip_alanlarini_ayarla(tip)
+        if personel and not self.instance.pk:
+            self.fields["personel"].initial = personel
+        if personel and not self.instance.pk and not self.data:
+            secili_tip = tip or self.initial.get("tip") or self.fields["tip"].initial
+            if secili_tip == IslemTipi.MAAS:
+                self.fields["tutar"].initial = personel.maas
 
 
 class AvansForm(MuhasebeIslemForm):

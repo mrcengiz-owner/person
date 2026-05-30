@@ -6,7 +6,7 @@ from .models import MuhasebeIslem, Personel
 class MuhasebeIslemInline(admin.TabularInline):
     model = MuhasebeIslem
     extra = 0
-    fields = ("tip", "tutar", "tarih", "aciklama")
+    fields = ("tip", "tutar", "tarih", "alici_adi", "aciklama")
 
 
 @admin.register(Personel)
@@ -28,7 +28,11 @@ class PersonelAdmin(admin.ModelAdmin):
 
 @admin.register(MuhasebeIslem)
 class MuhasebeIslemAdmin(admin.ModelAdmin):
-    list_display = ("personel", "tip", "tutar", "tarih", "kaydeden", "olusturulma")
+    list_display = ("alici_goster", "tip", "tutar", "tarih", "kaydeden", "olusturulma")
     readonly_fields = ("olusturulma", "guncellenme", "kaydeden", "guncelleyen")
     list_filter = ("tip", "tarih")
-    search_fields = ("personel__ad_soyad", "aciklama")
+    search_fields = ("personel__ad_soyad", "alici_adi", "aciklama")
+
+    @admin.display(description="Alıcı")
+    def alici_goster(self, obj):
+        return obj.alici_goster

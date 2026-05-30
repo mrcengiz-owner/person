@@ -22,6 +22,8 @@ urlpatterns = [
         RedirectView.as_view(pattern_name="muhasebe_islemler", permanent=False),
     ),
     path("muhasebe/islemler/", views.MuhasebeIslemlerView.as_view(), name="muhasebe_islemler"),
+    path("muhasebe/masraflar/", views.MasraflarView.as_view(), name="masraflar"),
+    path("muhasebe/masraflar/yeni/", views.OdemeKayitView.as_view(), name="odeme_kayit"),
     path(
         "muhasebe/islem/<int:pk>/duzenle/",
         views.IslemDuzenleView.as_view(),

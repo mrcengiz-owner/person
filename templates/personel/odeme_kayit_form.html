@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}{{ baslik }}{% endblock %}
+{% block page_title %}{{ baslik }}{% endblock %}
+
+{% block content %}
+<section class="card card-form">
+  <p class="form-intro">Masraf, personel avansı veya maaş ödemesini tek formdan kaydedebilirsiniz.</p>
+
+  <form method="post" novalidate id="odeme-kayit-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="form-grid">
+      <div class="form-field {% if form.tip.errors %}has-error{% endif %} full-width">
+        <label for="{{ form.tip.id_for_label }}">{{ form.tip.label }}</label>
+        {{ form.tip }}
+        {% for error in form.tip.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+
+      <div class="form-field {% if form.personel.errors %}has-error{% endif %} full-width" id="field-personel">
+        <label for="{{ form.personel.id_for_label }}">{{ form.personel.label }}</label>
+        {{ form.personel }}
+        <span class="field-hint" id="personel-hint">Avans ve maaş için zorunlu.</span>
+        {% for error in form.personel.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+
+      <div class="form-field {% if form.alici_adi.errors %}has-error{% endif %} full-width" id="field-alici">
+        <label for="{{ form.alici_adi.id_for_label }}">{{ form.alici_adi.label }}</label>
+        {{ form.alici_adi }}
+        <span class="field-hint" id="alici-hint">Personel dışı masraflar için (tedarikçi, kira vb.).</span>
+        {% for error in form.alici_adi.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+
+      <div class="form-field {% if form.tutar.errors %}has-error{% endif %}">
+        <label for="{{ form.tutar.id_for_label }}">{{ form.tutar.label }}</label>
+        {{ form.tutar }}
+        {% for error in form.tutar.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+
+      <div class="form-field {% if form.tarih.errors %}has-error{% endif %}">
+        <label for="{{ form.tarih.id_for_label }}">{{ form.tarih.label }}</label>
+        {{ form.tarih }}
+        {% for error in form.tarih.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+
+      <div class="form-field {% if form.aciklama.errors %}has-error{% endif %} full-width">
+        <label for="{{ form.aciklama.id_for_label }}">{{ form.aciklama.label }}</label>
+        {{ form.aciklama }}
+        {% for error in form.aciklama.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Kaydet</button>
+      <a href="{% url 'masraflar' %}" class="btn btn-ghost">İptal</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+{{ personel_maaslari|json_script:"personel-maaslari-data" }}
+<script src="{% static 'js/odeme-form.js' %}"></script>
+{% endblock %}

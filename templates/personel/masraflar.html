@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load personel_extras %}
+
+{% block title %}Masraflar{% endblock %}
+{% block page_title %}Masraflar ve Ödemeler{% endblock %}
+
+{% block content %}
+<div class="stats-grid stats-grid-4">
+  <div class="stat-card">
+    <span class="stat-label">Kayıt</span>
+    <strong class="stat-value">{{ toplam_kayit }}</strong>
+  </div>
+  <div class="stat-card stat-warning">
+    <span class="stat-label">Masraf</span>
+    <strong class="stat-value">{{ masraf_adet }}</strong>
+    <small>{{ toplam_masraf|para }}</small>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Avans</span>
+    <strong class="stat-value">{{ avans_adet }}</strong>
+    <small>{{ toplam_avans|para }}</small>
+  </div>
+  <div class="stat-card">
+    <span class="stat-label">Maaş</span>
+    <strong class="stat-value">{{ maas_adet }}</strong>
+    <small>{{ toplam_maas|para }}</small>
+  </div>
+</div>
+
+<div class="liste-toolbar islem-toolbar">
+  <a href="{% url 'odeme_kayit' %}" class="btn btn-primary">+ Yeni Kayıt</a>
+</div>
+
+<section class="card">
+  <div class="card-header-inline">
+    <p class="card-subtitle">Filtrelenen toplam: <strong>{{ filtre_toplam|para }}</strong></p>
+  </div>
+
+  <form method="get" class="filter-bar">
+    <div class="liste-search filter-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm8.3 14.7-4.2-4.2a8 8 0 1 0-1.4 1.4l4.2 4.2 1.4-1.4Z" fill="currentColor"/></svg>
+      <input type="search" name="q" value="{{ arama }}" placeholder="Alıcı, personel veya açıklama ara…">
+    </div>
+    <select name="tip" class="filter-select" aria-label="İşlem tipi">
+      <option value="">Tüm tipler</option>
+      <option value="masraf" {% if secili_tip == 'masraf' %}selected{% endif %}>Masraf</option>
+      <option value="avans" {% if secili_tip == 'avans' %}selected{% endif %}>Avans</option>
+      <option value="maas" {% if secili_tip == 'maas' %}selected{% endif %}>Maaş Ödemesi</option>
+    </select>
+    <select name="personel" class="filter-select" aria-label="Personel">
+      <option value="">Tüm personeller</option>
+      {% for p in personeller %}
+      <option value="{{ p.pk }}" {% if secili_personel == p.pk %}selected{% endif %}>{{ p.ad_soyad }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-secondary">Filtrele</button>
+    {% if arama or secili_tip or secili_personel %}
+    <a href="{% url 'masraflar' %}" class="btn btn-ghost">Temizle</a>
+    {% endif %}
+  </form>
+
+  {% if islemler %}
+  <div class="table-wrap">
+    <table class="islem-table table-stack">
+      <thead>
+        <tr>
+          <th>Tarih</th>
+          <th>Kime</th>
+          <th>Tip</th>
+          <th>Tutar</th>
+          <th>Açıklama</th>
+          <th>Kayıt</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in islemler %}
+        <tr>
+          <td class="tabular-nums" data-label="Tarih">{{ i.tarih|date:"d.m.Y" }}</td>
+          <td class="td-stack-top" data-label="Kime">
+            {% if i.personel_id %}
+            <button
+              type="button"
+              class="personel-name-btn personel-name-btn-inline"
+              data-personel-modal
+              data-url="{% url 'personel_detay_modal' i.personel.pk %}"
+              data-title="{{ i.personel.ad_soyad }}"
+            >
+              {{ i.personel.ad_soyad }}
+            </button>
+            {% else %}
+            <strong>{{ i.alici_adi }}</strong>
+            {% endif %}
+          </td>
+          <td data-label="Tip">
+            {% if i.tip == 'masraf' %}
+              <span class="badge badge-warning">Masraf</span>
+            {% elif i.tip == 'avans' %}
+              <span class="badge badge-info">Avans</span>
+            {% else %}
+              <span class="badge badge-success">Maaş</span>
+            {% endif %}
+          </td>
+          <td class="tabular-nums" data-label="Tutar"><strong>{{ i.tutar|para }}</strong></td>
+          <td class="islem-aciklama" data-label="Açıklama">{{ i.aciklama|default:"—" }}</td>
+          <td data-label="Kayıt"><span class="audit-meta">{{ i|kayit_ozeti }}</span></td>
+          <td class="actions" data-label="İşlem">
+            <a href="{% url 'islem_duzenle' i.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-ghost">Düzenle</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if islemler.has_other_pages %}
+  <nav class="pagination" aria-label="Sayfalama">
+    {% if islemler.has_previous %}
+      <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ islemler.previous_page_number }}" class="btn btn-sm btn-ghost">← Önceki</a>
+    {% endif %}
+    <span class="pagination-info">Sayfa {{ islemler.number }} / {{ islemler.paginator.num_pages }}</span>
+    {% if islemler.has_next %}
+      <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ islemler.next_page_number }}" class="btn btn-sm btn-ghost">Sonraki →</a>
+    {% endif %}
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <p class="empty-state">Henüz ödeme kaydı yok. <a href="{% url 'odeme_kayit' %}">İlk kaydı ekleyin</a>.</p>
+  {% endif %}
+</section>
+
+<div class="modal" id="personel-modal" hidden aria-hidden="true">
+  <div class="modal-backdrop"></div>
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-loading" id="modal-loading" hidden>
+      <span class="spinner"></span>
+      <span>Yükleniyor…</span>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/personel-liste.js' %}"></script>
+{% endblock %}

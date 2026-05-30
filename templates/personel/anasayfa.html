@@ -69,7 +69,7 @@
 <section class="card">
   <div class="card-header">
     <h2>Son İşlemler</h2>
-    <a href="{% url 'muhasebe_islemler' %}" class="link">Tümünü gör</a>
+    <a href="{% url 'masraflar' %}" class="link">Tümünü gör</a>
   </div>
   {% if son_islemler %}
   <div class="table-wrap">
@@ -77,7 +77,7 @@
       <thead>
         <tr>
           <th>Tarih</th>
-          <th>Personel</th>
+          <th>Kime</th>
           <th>Tip</th>
           <th>Tutar</th>
           <th>İşlemi yapan</th>
@@ -87,9 +87,17 @@
         {% for i in son_islemler %}
         <tr>
           <td data-label="Tarih">{{ i.tarih|date:"d.m.Y" }}</td>
-          <td class="td-stack-top" data-label="Personel"><a href="{% url 'personel_detay' i.personel.pk %}">{{ i.personel.ad_soyad }}</a></td>
+          <td class="td-stack-top" data-label="Kime">
+            {% if i.personel_id %}
+            <a href="{% url 'personel_detay' i.personel.pk %}">{{ i.personel.ad_soyad }}</a>
+            {% else %}
+            {{ i.alici_goster }}
+            {% endif %}
+          </td>
           <td data-label="Tip">
-            {% if i.tip == 'avans' %}
+            {% if i.tip == 'masraf' %}
+              <span class="badge badge-warning">Masraf</span>
+            {% elif i.tip == 'avans' %}
               <span class="badge badge-info">Avans</span>
             {% else %}
               <span class="badge badge-success">Maaş</span>

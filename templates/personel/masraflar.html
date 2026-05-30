@@ -5,38 +5,90 @@
 {% block page_title %}Masraflar ve Ödemeler{% endblock %}
 
 {% block content %}
-<div class="stats-grid stats-grid-4">
-  <div class="stat-card">
-    <span class="stat-label">Kayıt</span>
-    <strong class="stat-value">{{ toplam_kayit }}</strong>
-  </div>
-  <div class="stat-card stat-warning">
-    <span class="stat-label">Masraf</span>
-    <strong class="stat-value">{{ masraf_adet }}</strong>
-    <small>{{ toplam_masraf|para }}</small>
-  </div>
-  <div class="stat-card">
-    <span class="stat-label">Avans</span>
-    <strong class="stat-value">{{ avans_adet }}</strong>
-    <small>{{ toplam_avans|para }}</small>
-  </div>
-  <div class="stat-card">
-    <span class="stat-label">Maaş</span>
-    <strong class="stat-value">{{ maas_adet }}</strong>
-    <small>{{ toplam_maas|para }}</small>
+<nav class="donem-tabs" aria-label="Zaman periyodu">
+  {% for link in donem_linkleri %}
+  <a
+    href="?{{ link.url }}"
+    class="donem-tab {% if secili_donem == link.anahtar %}active{% endif %}"
+  >{{ link.etiket }}</a>
+  {% endfor %}
+</nav>
+
+<div class="masraf-dashboard">
+  <div class="masraf-stats-grid">
+    <article class="masraf-stat masraf-stat-hero masraf-stat-masraf">
+      <div class="masraf-stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4V4Zm0 4h10v2H4V8Zm0 4h16v2H4v-2Zm0 4h10v2H4v-2Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Toplam Masraf Miktarı</span>
+        <strong class="masraf-stat-value">{{ toplam_masraf|para }}</strong>
+        <span class="masraf-stat-meta">{{ masraf_adet }} masraf kaydı · {{ donem_araligi }}</span>
+      </div>
+      <div class="masraf-stat-glow" aria-hidden="true"></div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-accent masraf-stat-odeme">
+      <div class="masraf-stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2 2 7v2h20V7L12 2Zm8 9H4v9h16v-9ZM6 18v-5h2v5H6Zm4 0v-5h2v5h-2Zm4 0v-5h2v5h-2Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Toplam Ödeme</span>
+        <strong class="masraf-stat-value">{{ filtre_toplam|para }}</strong>
+        <span class="masraf-stat-meta">Masraf + avans + maaş</span>
+      </div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-kayit">
+      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14l-7-3-7 3V5a2 2 0 0 1 2-2Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Kayıt</span>
+        <strong class="masraf-stat-value masraf-stat-value-num">{{ toplam_kayit }}</strong>
+        <span class="masraf-stat-meta">Seçili dönem</span>
+      </div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-avans">
+      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Avans</span>
+        <strong class="masraf-stat-value">{{ toplam_avans|para }}</strong>
+        <span class="masraf-stat-meta">{{ avans_adet }} ödeme</span>
+      </div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-maas">
+      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm-7 9a7 7 0 0 1 14 0Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Maaş</span>
+        <strong class="masraf-stat-value">{{ toplam_maas|para }}</strong>
+        <span class="masraf-stat-meta">{{ maas_adet }} ödeme</span>
+      </div>
+    </article>
   </div>
 </div>
 
 <div class="liste-toolbar islem-toolbar">
-  <a href="{% url 'odeme_kayit' %}" class="btn btn-primary">+ Yeni Kayıt</a>
+  <a href="{% url 'odeme_kayit' %}?donem={{ secili_donem }}" class="btn btn-primary">+ Masraf Ekle</a>
+  <a href="{% url 'muhasebe_avans' %}" class="btn btn-secondary">+ Avans</a>
+  <a href="{% url 'muhasebe_maas' %}" class="btn btn-secondary">+ Maaş Öde</a>
 </div>
 
 <section class="card">
   <div class="card-header-inline">
-    <p class="card-subtitle">Filtrelenen toplam: <strong>{{ filtre_toplam|para }}</strong></p>
+    <p class="card-subtitle">
+      Avans ve maaş ödemeleri menüden kaydedildiğinde seçili dönemde otomatik görünür.
+    </p>
   </div>
 
   <form method="get" class="filter-bar">
+    <input type="hidden" name="donem" value="{{ secili_donem }}">
     <div class="liste-search filter-search">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm8.3 14.7-4.2-4.2a8 8 0 1 0-1.4 1.4l4.2 4.2 1.4-1.4Z" fill="currentColor"/></svg>
       <input type="search" name="q" value="{{ arama }}" placeholder="Alıcı, personel veya açıklama ara…">
@@ -55,7 +107,7 @@
     </select>
     <button type="submit" class="btn btn-secondary">Filtrele</button>
     {% if arama or secili_tip or secili_personel %}
-    <a href="{% url 'masraflar' %}" class="btn btn-ghost">Temizle</a>
+    <a href="{% url 'masraflar' %}?donem={{ secili_donem }}" class="btn btn-ghost">Temizle</a>
     {% endif %}
   </form>
 
@@ -126,7 +178,11 @@
   {% endif %}
 
   {% else %}
-  <p class="empty-state">Henüz ödeme kaydı yok. <a href="{% url 'odeme_kayit' %}">İlk kaydı ekleyin</a>.</p>
+  <p class="empty-state">
+    Bu dönemde kayıt yok.
+    <a href="{% url 'odeme_kayit' %}?donem={{ secili_donem }}">Masraf ekleyin</a>
+    veya menüden avans/maaş kaydedin.
+  </p>
   {% endif %}
 </section>
 

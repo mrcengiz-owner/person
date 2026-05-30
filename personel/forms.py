@@ -104,24 +104,15 @@ class MuhasebeIslemForm(forms.ModelForm):
         return cleaned
 
 
-class OdemeKayitForm(MuhasebeIslemForm):
-    """Masraf, avans ve maaş ödemelerini tek formdan kaydeder."""
+class MasrafKayitForm(MuhasebeIslemForm):
+    """Yalnızca masraf girişi; avans ve maaş menülerden otomatik gelir."""
 
-    def __init__(self, *args, personel=None, **kwargs):
-        tip = kwargs.pop("tip", None)
-        super().__init__(*args, tip=tip, **kwargs)
-        if not self.instance.pk:
-            self.fields["tip"].widget = forms.Select(choices=IslemTipi.choices)
-            if tip:
-                self.fields["tip"].initial = tip
-                self._tip_alanlarini_ayarla(tip)
-        if personel and not self.instance.pk:
-            self.fields["personel"].initial = personel
-        if personel and not self.instance.pk and not self.data:
-            secili_tip = tip or self.initial.get("tip") or self.fields["tip"].initial
-            if secili_tip == IslemTipi.MAAS:
-                self.fields["tutar"].initial = personel.maas
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, tip=IslemTipi.MASRAF, **kwargs)
 
+
+class OdemeKayitForm(MasrafKayitForm):
+    """Geriye dönük uyumluluk."""
 
 class AvansForm(MuhasebeIslemForm):
     def __init__(self, *args, **kwargs):

@@ -1,5 +1,5 @@
 import calendar
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from itertools import groupby
 
@@ -8,6 +8,17 @@ from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from .models import IslemTipi, MuhasebeIslem, Personel
+
+DONEM_GUNLUK = "gunluk"
+DONEM_HAFTALIK = "haftalik"
+DONEM_AYLIK = "aylik"
+DONEM_VARSAYILAN = DONEM_AYLIK
+
+DONEM_SECENEKLERI = (
+    (DONEM_GUNLUK, "Günlük"),
+    (DONEM_HAFTALIK, "Haftalık"),
+    (DONEM_AYLIK, "Aylık"),
+)
 
 AY_ADLARI = (
     "",
@@ -28,6 +39,37 @@ AY_ADLARI = (
 
 def _ayin_son_gunu(yil: int, ay: int) -> int:
     return calendar.monthrange(yil, ay)[1]
+
+
+def donem_dogrula(donem: str) -> str:
+    gecerli = {k for k, _ in DONEM_SECENEKLERI}
+    return donem if donem in gecerli else DONEM_VARSAYILAN
+
+
+def donem_tarih_araligi(
+    donem: str,
+    referans: date | None = None,
+) -> tuple[date, date]:
+    """Seçilen periyoda göre tarih aralığı (dahil)."""
+    referans = referans or timezone.localdate()
+    donem = donem_dogrula(donem)
+
+    if donem == DONEM_GUNLUK:
+        return referans, referans
+
+    if donem == DONEM_HAFTALIK:
+        baslangic = referans - timedelta(days=referans.weekday())
+        return baslangic, baslangic + timedelta(days=6)
+
+    baslangic = referans.replace(day=1)
+    bitis = referans.replace(day=_ayin_son_gunu(referans.year, referans.month))
+    return baslangic, bitis
+
+
+def donem_araligi_metin(baslangic: date, bitis: date) -> str:
+    if baslangic == bitis:
+        return baslangic.strftime("%d.%m.%Y")
+    return f"{baslangic.strftime('%d.%m.%Y')} – {bitis.strftime('%d.%m.%Y')}"
 
 
 def maas_tarihi_hesapla(personel: Personel, referans: date | None = None) -> date:

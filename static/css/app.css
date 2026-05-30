@@ -1235,6 +1235,223 @@ tr.row-warning {
   font-size: 0.9rem;
 }
 
+.donem-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.donem-tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.donem-tab:hover {
+  color: var(--text);
+  border-color: var(--primary);
+}
+
+.donem-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+/* Masraflar dashboard kartları */
+.masraf-dashboard {
+  margin-bottom: 1.25rem;
+}
+
+.masraf-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1rem;
+}
+
+.masraf-stat {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: calc(var(--radius) + 2px);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: var(--gradient-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.masraf-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.masraf-stat-hero {
+  grid-column: span 7;
+  padding: 1.5rem 1.6rem;
+  border-color: rgba(245, 158, 11, 0.35);
+  background: linear-gradient(145deg, #fffbeb 0%, #ffffff 45%, #fef3c7 100%);
+}
+
+.masraf-stat-accent {
+  grid-column: span 5;
+  border-color: rgba(79, 70, 229, 0.25);
+  background: linear-gradient(145deg, #eef2ff 0%, #ffffff 50%, #f5f3ff 100%);
+}
+
+.masraf-stat-kayit,
+.masraf-stat-avans,
+.masraf-stat-maas {
+  grid-column: span 4;
+}
+
+.masraf-stat-icon {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #fff;
+}
+
+.masraf-stat-icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.masraf-stat-icon-sm {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+}
+
+.masraf-stat-icon-sm svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.masraf-stat-masraf .masraf-stat-icon {
+  background: var(--gradient-warning);
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.35);
+}
+
+.masraf-stat-odeme .masraf-stat-icon {
+  background: var(--gradient-primary);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+.masraf-stat-kayit .masraf-stat-icon {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
+.masraf-stat-avans .masraf-stat-icon {
+  background: var(--gradient-info);
+  box-shadow: 0 6px 16px rgba(2, 132, 199, 0.25);
+}
+
+.masraf-stat-maas .masraf-stat-icon {
+  background: var(--gradient-success);
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.25);
+}
+
+.masraf-stat-content {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  flex: 1;
+}
+
+.masraf-stat-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.masraf-stat-value {
+  display: block;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.masraf-stat-hero .masraf-stat-value {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  background: linear-gradient(135deg, #92400e 0%, #d97706 50%, #b45309 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.masraf-stat-accent .masraf-stat-value {
+  background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.masraf-stat-value-num {
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.masraf-stat-meta {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.masraf-stat-glow {
+  position: absolute;
+  top: -2rem;
+  right: -2rem;
+  width: 8rem;
+  height: 8rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+@media (max-width: 1100px) {
+  .masraf-stat-hero,
+  .masraf-stat-accent {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 768px) {
+  .masraf-stat-hero,
+  .masraf-stat-accent,
+  .masraf-stat-kayit,
+  .masraf-stat-avans,
+  .masraf-stat-maas {
+    grid-column: span 12;
+  }
+
+  .masraf-stat {
+    padding: 1.1rem 1.2rem;
+  }
+}
+
 .form-actions {
   display: flex;
   gap: 0.5rem;

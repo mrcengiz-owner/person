@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
@@ -11,6 +12,7 @@ from .forms import (
     MESAI_ONAYARLARI,
     AvansForm,
     MaasOdemeForm,
+    MasrafKayitForm,
     MuhasebeIslemForm,
     OdemeKayitForm,
     PersonelForm,
@@ -18,6 +20,10 @@ from .forms import (
 from .audit import islem_kaydi_ozeti
 from .models import IslemTipi, MuhasebeIslem, Personel
 from .services import (
+    DONEM_SECENEKLERI,
+    donem_araligi_metin,
+    donem_dogrula,
+    donem_tarih_araligi,
     maas_tarihi_hesapla,
     maasa_kalan_gun,
     mesai_gorsel_bilgi,
@@ -150,6 +156,14 @@ def _islem_yonlendir(request, islem, varsayilan="muhasebe_islemler"):
     ):
         return redirect(next_url)
     return redirect(varsayilan)
+
+
+def _masraflar_query(request, **overrides):
+    q = request.GET.copy()
+    q.update(overrides)
+    if "page" in q:
+        del q["page"]
+    return q.urlencode()
 
 
 class MuhasebeIslemlerView(View):
@@ -332,9 +346,15 @@ class MasraflarView(View):
     sayfa_boyutu = 25
 
     def get(self, request):
-        qs = MuhasebeIslem.objects.select_related(
-            "personel", "kaydeden", "guncelleyen"
-        ).order_by("-tarih", "-olusturulma")
+        bugun = timezone.localdate()
+        secili_donem = donem_dogrula(request.GET.get("donem", ""))
+        baslangic, bitis = donem_tarih_araligi(secili_donem, bugun)
+
+        qs = (
+            MuhasebeIslem.objects.filter(tarih__gte=baslangic, tarih__lte=bitis)
+            .select_related("personel", "kaydeden", "guncelleyen")
+            .order_by("-tarih", "-olusturulma")
+        )
 
         tip = request.GET.get("tip", "")
         if tip in dict(IslemTipi.choices):
@@ -375,6 +395,15 @@ class MasraflarView(View):
         toplam_avans = sayim["toplam_avans"] or 0
         toplam_maas = sayim["toplam_maas"] or 0
 
+        donem_urls = {
+            anahtar: _masraflar_query(request, donem=anahtar)
+            for anahtar, _ in DONEM_SECENEKLERI
+        }
+        donem_linkleri = [
+            {"anahtar": anahtar, "etiket": etiket, "url": donem_urls[anahtar]}
+            for anahtar, etiket in DONEM_SECENEKLERI
+        ]
+
         return render(
             request,
             self.template_name,
@@ -383,6 +412,10 @@ class MasraflarView(View):
                 "personeller": Personel.objects.order_by("ad_soyad"),
                 "secili_tip": tip,
                 "secili_personel": secili_personel_pk,
+                "secili_donem": secili_donem,
+                "donem_secenekleri": DONEM_SECENEKLERI,
+                "donem_linkleri": donem_linkleri,
+                "donem_araligi": donem_araligi_metin(baslangic, bitis),
                 "arama": arama,
                 "toplam_kayit": sayim["toplam"],
                 "masraf_adet": sayim["masraf_adet"],
@@ -400,36 +433,26 @@ class MasraflarView(View):
 class OdemeKayitView(View):
     template_name = "personel/odeme_kayit_form.html"
 
-    def _form_context(self, form):
+    def _form_context(self, form, donem):
         return {
             "form": form,
-            "baslik": "Ödeme / Masraf Kaydı",
-            "personel_maaslari": list(
-                Personel.objects.filter(aktif=True).values_list("pk", "maas")
-            ),
+            "baslik": "Masraf Kaydı",
+            "secili_donem": donem,
         }
 
     def get(self, request):
-        personel_pk = request.GET.get("personel")
-        personel = Personel.objects.filter(pk=personel_pk).first() if personel_pk else None
-        tip = request.GET.get("tip", "")
-        if tip not in dict(IslemTipi.choices):
-            tip = None
-
-        form = OdemeKayitForm(
-            initial={"tarih": timezone.localdate()},
-            personel=personel,
-            tip=tip,
-        )
-        return render(request, self.template_name, self._form_context(form))
+        donem = donem_dogrula(request.GET.get("donem", ""))
+        form = MasrafKayitForm(initial={"tarih": timezone.localdate()})
+        return render(request, self.template_name, self._form_context(form, donem))
 
     def post(self, request):
-        form = OdemeKayitForm(request.POST)
+        donem = donem_dogrula(request.POST.get("donem") or request.GET.get("donem", ""))
+        form = MasrafKayitForm(request.POST)
         if form.is_valid():
             islem = form.save(commit=False)
             islem.kaydeden = request.user
             islem.guncelleyen = request.user
             islem.save()
             messages.success(request, _islem_basarili_mesaj(islem))
-            return redirect("masraflar")
-        return render(request, self.template_name, self._form_context(form))
+            return redirect(f"{reverse('masraflar')}?{_masraflar_query(request, donem=donem)}")
+        return render(request, self.template_name, self._form_context(form, donem))

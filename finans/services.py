@@ -45,10 +45,18 @@ def kasa_liste_ozet() -> dict:
             }
         )
 
+    aktif_sayisi = sum(1 for s in satirlar if s["kasa"].aktif)
+    kripto_sayisi = sum(
+        1 for s in satirlar if s["kasa"].para_birimi not in (ParaBirimi.TRY, ParaBirimi.USD, ParaBirimi.EUR)
+    )
+    fiat_sayisi = len(satirlar) - kripto_sayisi
+
     return {
         "kasalar": satirlar,
         "toplam_try": toplam_try,
-        "aktif_sayisi": sum(1 for s in satirlar if s["kasa"].aktif),
+        "aktif_sayisi": aktif_sayisi,
+        "kripto_sayisi": kripto_sayisi,
+        "fiat_sayisi": fiat_sayisi,
     }
 
 

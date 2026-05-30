@@ -35,6 +35,26 @@ def para_birimi_etiket(value):
     return dict(ParaBirimi.choices).get(value, value)
 
 
+PARA_BIRIMI_SINIF = {
+    ParaBirimi.TRY: "kasa-currency-try",
+    ParaBirimi.USD: "kasa-currency-usd",
+    ParaBirimi.EUR: "kasa-currency-eur",
+    ParaBirimi.BTC: "kasa-currency-btc",
+    ParaBirimi.ETH: "kasa-currency-eth",
+    ParaBirimi.USDT: "kasa-currency-usdt",
+    ParaBirimi.USDC: "kasa-currency-usdc",
+    ParaBirimi.SOL: "kasa-currency-sol",
+    ParaBirimi.BNB: "kasa-currency-bnb",
+    ParaBirimi.XRP: "kasa-currency-xrp",
+    ParaBirimi.DOGE: "kasa-currency-doge",
+}
+
+
+@register.filter
+def para_birimi_sinif(value):
+    return PARA_BIRIMI_SINIF.get(value, "kasa-currency-default")
+
+
 @register.filter
 def para_birimi_sembol(value):
     return PARA_BIRIMI_SEMBOL.get(value, value.upper())

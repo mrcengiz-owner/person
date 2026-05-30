@@ -5,80 +5,161 @@
 {% block page_title %}Kasalar{% endblock %}
 
 {% block content %}
-<div class="kasa-dashboard">
-  <div class="masraf-stats-grid masraf-stats-grid-4">
-    <article class="masraf-stat masraf-stat-hero masraf-stat-kasa">
-      <div class="masraf-stat-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v2h16V6H4Zm0 4v8h16v-8H4Zm2 2h4v4H6v-4Z" fill="currentColor"/></svg>
-      </div>
-      <div class="masraf-stat-content">
-        <span class="masraf-stat-label">Toplam TL Karşılığı</span>
-        <strong class="masraf-stat-value">{{ toplam_try|para }}</strong>
-        <span class="masraf-stat-meta">Güncel kurlarla · {{ ozet.aktif_sayisi }} aktif kasa</span>
-      </div>
-      <div class="masraf-stat-glow" aria-hidden="true"></div>
-    </article>
-
-    <article class="masraf-stat masraf-stat-kayit">
-      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h12v2H3v-2Z" fill="currentColor"/></svg>
-      </div>
-      <div class="masraf-stat-content">
-        <span class="masraf-stat-label">Kasa Sayısı</span>
-        <strong class="masraf-stat-value masraf-stat-value-num">{{ kasalar|length }}</strong>
-        <span class="masraf-stat-meta">Tüm para birimleri</span>
-      </div>
-    </article>
-  </div>
-</div>
-
-<div class="liste-toolbar islem-toolbar">
-  <a href="{% url 'kasa_yeni' %}" class="btn btn-primary">+ Yeni Kasa</a>
-</div>
-
-{% if kasalar %}
-<section class="kasa-grid">
-  {% for satir in kasalar %}
-  <article class="kasa-card {% if not satir.kasa.aktif %}kasa-card-pasif{% endif %}">
-    <header class="kasa-card-header">
-      <div>
-        <h3><a href="{% url 'kasa_detay' satir.kasa.pk %}">{{ satir.kasa.ad }}</a></h3>
-        <span class="badge badge-info">{{ satir.kasa|para_birimi_etiket }}</span>
-        {% if not satir.kasa.aktif %}<span class="badge badge-muted">Pasif</span>{% endif %}
-      </div>
-      <a href="{% url 'kasa_duzenle' satir.kasa.pk %}" class="btn btn-ghost btn-sm">Düzenle</a>
-    </header>
-    <div class="kasa-card-body">
-      <div class="kasa-bakiye">
-        <span class="kasa-bakiye-label">Bakiye</span>
-        <strong>{{ satir.bakiye|para_doviz:satir.kasa.para_birimi }}</strong>
-      </div>
-      {% if satir.kasa.para_birimi != "try" %}
-      <div class="kasa-bakiye-alt">
-        {% if satir.bakiye_try is not None %}
-        <span>≈ {{ satir.bakiye_try|para }}</span>
-        {% if satir.kur %}
-        <small>1 {{ satir.kasa.para_birimi|upper }} = {{ satir.kur|para_doviz:"try" }}</small>
-        {% else %}
-        <small class="text-warning">Kur alınamadı</small>
-        {% endif %}
-        {% else %}
-        <small class="text-warning">Kur alınamadı</small>
-        {% endif %}
-      </div>
-      {% endif %}
+<div class="kasa-page">
+  <header class="kasa-hero">
+    <div class="kasa-hero-content">
+      <p class="kasa-hero-kicker">Varlık yönetimi</p>
+      <h2 class="kasa-hero-title">Kasa portföyünüz</h2>
+      <p class="kasa-hero-sub">
+        Nakit, banka ve kripto kasalarınızı tek ekranda takip edin. Güncel kurlarla TL karşılığı otomatik hesaplanır.
+      </p>
     </div>
-    <footer class="kasa-card-footer">
-      <a href="{% url 'kasa_hareket_yeni' satir.kasa.pk %}" class="btn btn-primary btn-sm">Para Ekle / Çıkar</a>
-      <a href="{% url 'kasa_detay' satir.kasa.pk %}" class="btn btn-ghost btn-sm">Hareketler</a>
-    </footer>
-  </article>
-  {% endfor %}
-</section>
-{% else %}
-<section class="card">
-  <p class="empty-state">Henüz kasa tanımlanmamış. İlk kasanızı oluşturarak başlayın.</p>
-  <p><a href="{% url 'kasa_yeni' %}" class="btn btn-primary">+ Yeni Kasa Oluştur</a></p>
-</section>
-{% endif %}
+    <div class="kasa-hero-actions">
+      <a href="{% url 'kasa_yeni' %}" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Yeni Kasa
+      </a>
+    </div>
+  </header>
+
+  <div class="masraf-dashboard kasa-dashboard">
+    <div class="masraf-stats-grid masraf-stats-grid-kasalar">
+      <article class="masraf-stat masraf-stat-hero masraf-stat-kasa-hero">
+        <div class="masraf-stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm0 2v2h16V6H4Zm0 4v8h16v-8H4Zm2 2h4v4H6v-4Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Toplam TL Karşılığı</span>
+          <strong class="masraf-stat-value">{{ toplam_try|para }}</strong>
+          <span class="masraf-stat-meta">Güncel kurlarla birleşik bakiye</span>
+        </div>
+        <div class="masraf-stat-glow masraf-stat-glow-kasa" aria-hidden="true"></div>
+      </article>
+
+      <article class="masraf-stat masraf-stat-kayit kasa-stat-count">
+        <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h12v2H3v-2Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Toplam Kasa</span>
+          <strong class="masraf-stat-value masraf-stat-value-num">{{ kasalar|length }}</strong>
+          <span class="masraf-stat-meta">{{ ozet.aktif_sayisi }} aktif</span>
+        </div>
+      </article>
+
+      <article class="masraf-stat masraf-stat-accent kasa-stat-crypto">
+        <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2 4 14h16L12 2Zm0 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Kripto Kasalar</span>
+          <strong class="masraf-stat-value masraf-stat-value-num">{{ ozet.kripto_sayisi }}</strong>
+          <span class="masraf-stat-meta">BTC, ETH, USDT vb.</span>
+        </div>
+      </article>
+
+      <article class="masraf-stat kasa-stat-fiat">
+        <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Fiat Kasalar</span>
+          <strong class="masraf-stat-value masraf-stat-value-num">{{ ozet.fiat_sayisi }}</strong>
+          <span class="masraf-stat-meta">TRY, USD, EUR</span>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  {% if kasalar %}
+  <section class="kasa-section">
+    <div class="kasa-section-head">
+      <div>
+        <h2 class="kasa-section-title">Kasalarım</h2>
+        <p class="kasa-section-sub">{{ kasalar|length }} kasa · detay için karta tıklayın</p>
+      </div>
+    </div>
+
+    <div class="kasa-wallet-grid">
+      {% for satir in kasalar %}
+      <article class="kasa-wallet {{ satir.kasa.para_birimi|para_birimi_sinif }}{% if not satir.kasa.aktif %} kasa-wallet-pasif{% endif %}">
+        <a href="{% url 'kasa_detay' satir.kasa.pk %}" class="kasa-wallet-link" aria-label="{{ satir.kasa.ad }} detay"></a>
+
+        <div class="kasa-wallet-visual">
+          <span class="kasa-wallet-symbol">{{ satir.kasa.para_birimi|para_birimi_sembol }}</span>
+          <span class="kasa-wallet-code">{{ satir.kasa.para_birimi|upper }}</span>
+          <div class="kasa-wallet-shine" aria-hidden="true"></div>
+        </div>
+
+        <div class="kasa-wallet-body">
+          <div class="kasa-wallet-top">
+            <div>
+              <h3 class="kasa-wallet-name">{{ satir.kasa.ad }}</h3>
+              <span class="kasa-wallet-type">{{ satir.kasa|para_birimi_etiket }}</span>
+            </div>
+            <a href="{% url 'kasa_duzenle' satir.kasa.pk %}" class="kasa-wallet-edit" title="Düzenle" onclick="event.stopPropagation();">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a1.5 1.5 0 0 0-4-4L4 16v4Zm13.5-9.5 1-1" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+
+          {% if not satir.kasa.aktif %}
+          <span class="kasa-wallet-badge kasa-wallet-badge-pasif">Pasif</span>
+          {% endif %}
+
+          <div class="kasa-wallet-balance">
+            <span class="kasa-wallet-balance-label">Güncel bakiye</span>
+            <strong class="kasa-wallet-balance-value">{{ satir.bakiye|para_doviz:satir.kasa.para_birimi }}</strong>
+            {% if satir.kasa.para_birimi != "try" %}
+            <div class="kasa-wallet-try-row">
+              {% if satir.bakiye_try is not None %}
+              <span class="kasa-wallet-try">≈ {{ satir.bakiye_try|para }}</span>
+              {% else %}
+              <span class="kasa-wallet-try kasa-wallet-try-warn">TL karşılığı hesaplanamadı</span>
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+
+          {% if satir.kasa.para_birimi != "try" and satir.kur %}
+          <div class="kasa-wallet-kur">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16M12 4v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            1 {{ satir.kasa.para_birimi|upper }} = {{ satir.kur|para }}
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="kasa-wallet-actions">
+          <a href="{% url 'kasa_hareket_yeni' satir.kasa.pk %}" class="kasa-wallet-btn kasa-wallet-btn-primary" onclick="event.stopPropagation();">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Para Ekle
+          </a>
+          <a href="{% url 'kasa_detay' satir.kasa.pk %}" class="kasa-wallet-btn" onclick="event.stopPropagation();">
+            Hareketler
+          </a>
+        </div>
+      </article>
+      {% endfor %}
+
+      <a href="{% url 'kasa_yeni' %}" class="kasa-wallet kasa-wallet-new">
+        <div class="kasa-wallet-new-inner">
+          <span class="kasa-wallet-new-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+          <strong>Yeni Kasa</strong>
+          <span>TRY, USD veya kripto</span>
+        </div>
+      </a>
+    </div>
+  </section>
+  {% else %}
+  <section class="kasa-empty">
+    <div class="kasa-empty-visual" aria-hidden="true">
+      <svg viewBox="0 0 120 80"><rect x="8" y="16" width="104" height="48" rx="10" fill="none" stroke="currentColor" stroke-width="2"/><rect x="20" y="28" width="24" height="16" rx="4" fill="currentColor" opacity="0.15"/><line x1="52" y1="32" x2="96" y2="32" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.35"/><line x1="52" y1="44" x2="80" y2="44" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.25"/></svg>
+    </div>
+    <h2>Henüz kasa yok</h2>
+    <p>İlk kasanızı oluşturarak nakit, banka veya kripto bakiyelerinizi takip etmeye başlayın.</p>
+    <a href="{% url 'kasa_yeni' %}" class="btn btn-primary">+ İlk Kasayı Oluştur</a>
+  </section>
+  {% endif %}
+</div>
 {% endblock %}

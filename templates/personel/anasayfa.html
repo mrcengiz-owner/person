@@ -5,119 +5,208 @@
 {% block page_title %}Anasayfa{% endblock %}
 
 {% block content %}
-<div class="stats-grid">
-  <div class="stat-card">
-    <span class="stat-label">Aktif Personel</span>
-    <strong class="stat-value">{{ aktif_personel_sayisi }}</strong>
-  </div>
-  <div class="stat-card stat-warning">
-    <span class="stat-label">Maaş Uyarısı</span>
-    <strong class="stat-value">{{ maas_uyarilari|length }}</strong>
-    <small>Önümüzdeki {{ maas_uyari_gun|default:3 }} gün içinde</small>
-  </div>
-  <div class="stat-card">
-    <span class="stat-label">Bugün</span>
-    <strong class="stat-value stat-date">{{ bugun|date:"d M Y" }}</strong>
-  </div>
-</div>
+<div class="home-page">
+  <header class="home-hero">
+    <div class="home-hero-content">
+      <p class="home-hero-kicker">{{ ozet.bu_ay_etiket }}</p>
+      <h2 class="home-hero-title">Merhaba, {{ user.get_full_name|default:user.username }}</h2>
+      <p class="home-hero-sub">{{ bugun|date:"d F Y" }} · {{ ozet.donem_araligi }}</p>
+    </div>
+    <div class="home-hero-actions">
+      <a href="{% url 'odeme_kayit' %}" class="btn btn-primary">+ Masraf Ekle</a>
+      <a href="{% url 'masraflar' %}" class="btn btn-secondary">Masraflar</a>
+    </div>
+  </header>
 
-{% if maas_uyarilari %}
-<section class="card card-alert">
-  <div class="card-header">
-    <h2>Maaşı Yaklaşan Personeller</h2>
-    <span class="badge badge-warning">{{ maas_uyarilari|length }} uyarı</span>
+  <div class="masraf-dashboard home-dashboard">
+    <div class="masraf-stats-grid">
+      <a href="{% url 'masraflar' %}?donem=aylik" class="masraf-stat masraf-stat-hero masraf-stat-masraf home-stat-link">
+        <div class="masraf-stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4V4Zm0 4h10v2H4V8Zm0 4h16v2H4v-2Zm0 4h10v2H4v-2Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Bu Ay Toplam Masraf</span>
+          <strong class="masraf-stat-value">{{ ozet.aylik_masraf|para }}</strong>
+          <span class="masraf-stat-meta">{{ ozet.bu_ay_etiket }} · Detay için tıklayın</span>
+        </div>
+        <div class="masraf-stat-glow" aria-hidden="true"></div>
+      </a>
+
+      <a href="{% url 'masraflar' %}?donem=aylik" class="masraf-stat masraf-stat-accent masraf-stat-odeme home-stat-link">
+        <div class="masraf-stat-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2 2 7v2h20V7L12 2Zm8 9H4v9h16v-9ZM6 18v-5h2v5H6Zm4 0v-5h2v5h-2Zm4 0v-5h2v5h-2Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Bu Ay Toplam Ödeme</span>
+          <strong class="masraf-stat-value">{{ ozet.aylik_toplam|para }}</strong>
+          <span class="masraf-stat-meta">{{ ozet.aylik_kayit }} kayıt · masraf + avans + maaş</span>
+        </div>
+      </a>
+
+      <a href="{% url 'personel_liste' %}" class="masraf-stat masraf-stat-kayit home-stat-link">
+        <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm-7 9a7 7 0 0 1 14 0Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Aktif Personel</span>
+          <strong class="masraf-stat-value masraf-stat-value-num">{{ aktif_personel_sayisi }}</strong>
+          <span class="masraf-stat-meta">Toplam {{ toplam_personel_sayisi }} kayıt</span>
+        </div>
+      </a>
+
+      <div class="masraf-stat masraf-stat-uyari {% if maas_uyarilari %}masraf-stat-uyari-active{% endif %}">
+        <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2 4 14h16L12 2Zm0 16a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Maaş Uyarısı</span>
+          <strong class="masraf-stat-value masraf-stat-value-num">{{ maas_uyarilari|length }}</strong>
+          <span class="masraf-stat-meta">Önümüzdeki {{ maas_uyari_gun|default:3 }} gün</span>
+        </div>
+      </div>
+
+      <div class="masraf-stat masraf-stat-avans">
+        <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Bu Ay Avans</span>
+          <strong class="masraf-stat-value">{{ ozet.aylik_avans|para }}</strong>
+          <span class="masraf-stat-meta">{{ ozet.bu_ay_etiket }}</span>
+        </div>
+      </div>
+
+      <div class="masraf-stat masraf-stat-maas">
+        <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12ZM6 19H4v-2h2v2Zm0-4H4v-2h2v2Zm0-4H4V9h2v2Zm0-4H4V5h2v2Zm4 12H8v-2h2v2Zm0-4H8v-2h2v2Zm0-4H8V9h2v2Zm0-4H8V5h2v2Zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10Z" fill="currentColor"/></svg>
+        </div>
+        <div class="masraf-stat-content">
+          <span class="masraf-stat-label">Bu Ay Maaş</span>
+          <strong class="masraf-stat-value">{{ ozet.aylik_maas|para }}</strong>
+          <span class="masraf-stat-meta">{{ ozet.bu_ay_etiket }}</span>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="table-wrap">
-    <table class="table-stack">
-      <thead>
-        <tr>
-          <th>Personel</th>
-          <th>Maaş</th>
-          <th>Ödeme Tarihi</th>
-          <th>Kalan</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
+
+  <div class="home-grid">
+    <section class="card home-panel {% if maas_uyarilari %}card-alert{% endif %}" id="maas-uyarilari">
+      <div class="card-header">
+        <div>
+          <h2>Maaşı Yaklaşan Personeller</h2>
+          <p class="home-panel-sub">
+            {% if maas_uyarilari %}
+              {{ maas_uyarilari|length }} personel için ödeme tarihi yaklaşıyor
+            {% else %}
+              Yaklaşan maaş uyarısı yok
+            {% endif %}
+          </p>
+        </div>
+        {% if maas_uyarilari %}
+        <span class="badge badge-warning">{{ maas_uyarilari|length }} uyarı</span>
+        {% else %}
+        <span class="badge badge-success">Tamam</span>
+        {% endif %}
+      </div>
+
+      {% if maas_uyarilari %}
+      <ul class="home-alert-list">
         {% for u in maas_uyarilari %}
-        <tr>
-          <td class="td-stack-top" data-label="Personel"><strong>{{ u.personel.ad_soyad }}</strong></td>
-          <td data-label="Maaş">{{ u.personel.maas|para }}</td>
-          <td data-label="Ödeme Tarihi">{{ u.sonraki_maas|date:"d.m.Y" }}</td>
-          <td data-label="Kalan">
+        <li class="home-alert-item">
+          <span class="home-alert-avatar" aria-hidden="true">{{ u.personel.ad_soyad|slice:":1"|upper }}</span>
+          <div class="home-alert-body">
+            <strong>{{ u.personel.ad_soyad }}</strong>
+            <span>{{ u.personel.maas|para }} · Ödeme {{ u.sonraki_maas|date:"d.m.Y" }}</span>
+          </div>
+          <div class="home-alert-meta">
             {% if u.kalan_gun == 0 %}
               <span class="badge badge-danger">Bugün</span>
             {% else %}
               <span class="badge badge-warning">{{ u.kalan_gun }} gün</span>
             {% endif %}
-          </td>
-          <td class="actions" data-label="İşlem">
             <a href="{% url 'muhasebe_maas' %}?personel={{ u.personel.pk }}" class="btn btn-sm btn-primary">Maaş Öde</a>
-          </td>
-        </tr>
+          </div>
+        </li>
         {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</section>
-{% else %}
-<section class="card">
-  <p class="empty-state">Şu an yaklaşan maaş uyarısı yok. Her şey yolunda görünüyor.</p>
-</section>
-{% endif %}
+      </ul>
+      {% else %}
+      <div class="home-empty-panel">
+        <p>Şu an yaklaşan maaş uyarısı yok. Her şey yolunda görünüyor.</p>
+      </div>
+      {% endif %}
+    </section>
 
-<section class="card">
-  <div class="card-header">
-    <h2>Son İşlemler</h2>
-    <a href="{% url 'masraflar' %}" class="link">Tümünü gör</a>
-  </div>
-  {% if son_islemler %}
-  <div class="table-wrap">
-    <table class="table-stack">
-      <thead>
-        <tr>
-          <th>Tarih</th>
-          <th>Kime</th>
-          <th>Tip</th>
-          <th>Tutar</th>
-          <th>İşlemi yapan</th>
-        </tr>
-      </thead>
-      <tbody>
+    <section class="card home-panel">
+      <div class="card-header">
+        <div>
+          <h2>Son İşlemler</h2>
+          <p class="home-panel-sub">En son kaydedilen ödemeler</p>
+        </div>
+        <a href="{% url 'masraflar' %}" class="link">Tümünü gör</a>
+      </div>
+
+      {% if son_islemler %}
+      <ul class="home-activity-list">
         {% for i in son_islemler %}
-        <tr>
-          <td data-label="Tarih">{{ i.tarih|date:"d.m.Y" }}</td>
-          <td class="td-stack-top" data-label="Kime">
-            {% if i.personel_id %}
-            <a href="{% url 'personel_detay' i.personel.pk %}">{{ i.personel.ad_soyad }}</a>
-            {% else %}
-            {{ i.alici_goster }}
-            {% endif %}
-          </td>
-          <td data-label="Tip">
-            {% if i.tip == 'masraf' %}
-              <span class="badge badge-warning">Masraf</span>
-            {% elif i.tip == 'avans' %}
-              <span class="badge badge-info">Avans</span>
-            {% else %}
-              <span class="badge badge-success">Maaş</span>
-            {% endif %}
-          </td>
-          <td data-label="Tutar">{{ i.tutar|para }}</td>
-          <td data-label="İşlemi yapan"><span class="audit-meta">{{ i|kayit_ozeti }}</span></td>
-        </tr>
+        <li class="home-activity-item home-activity-{{ i.tip }}">
+          <div class="home-activity-main">
+            <div class="home-activity-top">
+              {% if i.tip == 'masraf' %}
+                <span class="badge badge-warning badge-pill">Masraf</span>
+              {% elif i.tip == 'avans' %}
+                <span class="badge badge-info badge-pill">Avans</span>
+              {% else %}
+                <span class="badge badge-success badge-pill">Maaş</span>
+              {% endif %}
+              <time datetime="{{ i.tarih|date:'Y-m-d' }}">{{ i.tarih|date:"d.m.Y" }}</time>
+            </div>
+            <strong class="home-activity-name">
+              {% if i.personel_id %}
+              <a href="{% url 'personel_detay' i.personel.pk %}">{{ i.personel.ad_soyad }}</a>
+              {% else %}
+              {{ i.alici_goster }}
+              {% endif %}
+            </strong>
+            <span class="audit-meta">{{ i|kayit_ozeti }}</span>
+          </div>
+          <strong class="home-activity-amount">{{ i.tutar|para }}</strong>
+        </li>
         {% endfor %}
-      </tbody>
-    </table>
+      </ul>
+      {% else %}
+      <div class="home-empty-panel">
+        <p>Henüz işlem kaydı yok.</p>
+        <a href="{% url 'odeme_kayit' %}" class="btn btn-sm btn-secondary">İlk masrafı ekle</a>
+      </div>
+      {% endif %}
+    </section>
   </div>
-  {% else %}
-  <p class="empty-state">Henüz işlem kaydı yok.</p>
-  {% endif %}
-</section>
 
-<div class="quick-actions">
-  <a href="{% url 'personel_yeni' %}" class="btn btn-primary">+ Yeni Personel</a>
-  <a href="{% url 'muhasebe_avans' %}" class="btn btn-secondary">Avans Ver</a>
-  <a href="{% url 'muhasebe_maas' %}" class="btn btn-secondary">Maaş Öde</a>
+  <div class="home-quick-grid">
+    <a href="{% url 'personel_yeni' %}" class="home-quick-card">
+      <span class="home-quick-icon home-quick-icon-primary" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm-7 9a7 7 0 0 1 14 0Z" fill="currentColor"/></svg>
+      </span>
+      <span class="home-quick-label">Yeni Personel</span>
+    </a>
+    <a href="{% url 'muhasebe_avans' %}" class="home-quick-card">
+      <span class="home-quick-icon home-quick-icon-info" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z" fill="currentColor"/></svg>
+      </span>
+      <span class="home-quick-label">Avans Ver</span>
+    </a>
+    <a href="{% url 'muhasebe_maas' %}" class="home-quick-card">
+      <span class="home-quick-icon home-quick-icon-success" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 7V3H2v18h20V7H12ZM6 19H4v-2h2v2Zm0-4H4v-2h2v2Zm0-4H4V9h2v2Zm0-4H4V5h2v2Zm4 12H8v-2h2v2Zm0-4H8v-2h2v2Zm0-4H8V9h2v2Zm0-4H8V5h2v2Zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10Z" fill="currentColor"/></svg>
+      </span>
+      <span class="home-quick-label">Maaş Öde</span>
+    </a>
+    <a href="{% url 'personel_liste' %}" class="home-quick-card">
+      <span class="home-quick-icon home-quick-icon-muted" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z" fill="currentColor"/></svg>
+      </span>
+      <span class="home-quick-label">Personel Listesi</span>
+    </a>
+  </div>
 </div>
 {% endblock %}

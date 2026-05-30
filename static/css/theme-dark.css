@@ -125,6 +125,38 @@
   color: #fff;
 }
 
+[data-theme="dark"] .home-hero {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.18), transparent 45%),
+    linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.92) 100%);
+  border-color: rgba(129, 140, 248, 0.25);
+}
+
+[data-theme="dark"] .masraf-stat-uyari-active {
+  background: linear-gradient(145deg, rgba(120, 83, 9, 0.28) 0%, rgba(30, 41, 59, 0.95) 100%);
+}
+
+[data-theme="dark"] .home-alert-item,
+[data-theme="dark"] .home-activity-item {
+  background: rgba(15, 23, 42, 0.55);
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
+[data-theme="dark"] .home-alert-item:hover,
+[data-theme="dark"] .home-activity-item:hover {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: rgba(129, 140, 248, 0.25);
+}
+
+[data-theme="dark"] .home-activity-name a {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .home-quick-card {
+  background: var(--gradient-card);
+  border-color: rgba(148, 163, 184, 0.12);
+}
+
 [data-theme="dark"] .card-alert {
   background: linear-gradient(160deg, rgba(120, 83, 9, 0.2) 0%, rgba(30, 41, 59, 0.85) 100%);
   border-color: rgba(251, 191, 36, 0.3);

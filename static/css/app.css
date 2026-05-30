@@ -1452,6 +1452,351 @@ tr.row-warning {
   }
 }
 
+/* Anasayfa */
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.home-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: 1.5rem 1.6rem;
+  border-radius: calc(var(--radius) + 4px);
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(99, 102, 241, 0.14), transparent 45%),
+    linear-gradient(145deg, #ffffff 0%, #eef2ff 55%, #f8fafc 100%);
+  box-shadow: var(--shadow-card);
+}
+
+.home-hero-kicker {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.home-hero-title {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.home-hero-sub {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.home-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.home-dashboard .masraf-stat-kayit,
+.home-dashboard .masraf-stat-uyari,
+.home-dashboard .masraf-stat-avans,
+.home-dashboard .masraf-stat-maas {
+  grid-column: span 3;
+}
+
+.home-stat-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.home-stat-link:hover {
+  text-decoration: none;
+}
+
+.masraf-stat-uyari {
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.masraf-stat-uyari-active {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: linear-gradient(145deg, #fffbeb 0%, #ffffff 50%, #fef3c7 100%);
+}
+
+.masraf-stat-uyari .masraf-stat-icon {
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+}
+
+.masraf-stat-uyari-active .masraf-stat-icon {
+  background: var(--gradient-warning);
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3);
+}
+
+.masraf-stat-uyari-active .masraf-stat-value-num {
+  background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.home-panel {
+  margin-bottom: 0;
+}
+
+.home-panel-sub {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.home-empty-panel {
+  padding: 1.25rem 0 0.5rem;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.home-empty-panel p {
+  margin: 0;
+}
+
+.home-alert-list,
+.home-activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.home-alert-item,
+.home-activity-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(248, 250, 252, 0.7);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.home-alert-item:hover,
+.home-activity-item:hover {
+  border-color: rgba(79, 70, 229, 0.25);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.home-alert-avatar {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #fff;
+  background: var(--gradient-primary);
+}
+
+.home-alert-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.home-alert-body strong {
+  font-size: 0.95rem;
+}
+
+.home-alert-body span {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.home-alert-meta {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.home-activity-item {
+  justify-content: space-between;
+}
+
+.home-activity-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-activity-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.home-activity-top time {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.home-activity-name {
+  display: block;
+  font-size: 0.92rem;
+  margin-bottom: 0.15rem;
+}
+
+.home-activity-name a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.home-activity-name a:hover {
+  color: var(--primary);
+}
+
+.home-activity-amount {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.home-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.home-quick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 1.1rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: var(--gradient-card);
+  box-shadow: var(--shadow-card);
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+}
+
+.home-quick-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: rgba(79, 70, 229, 0.3);
+  text-decoration: none;
+}
+
+.home-quick-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+
+.home-quick-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.home-quick-icon-primary { background: var(--gradient-primary); }
+.home-quick-icon-info { background: var(--gradient-info); }
+.home-quick-icon-success { background: var(--gradient-success); }
+.home-quick-icon-muted {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+}
+
+.home-quick-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+@media (max-width: 1100px) {
+  .home-dashboard .masraf-stat-kayit,
+  .home-dashboard .masraf-stat-uyari,
+  .home-dashboard .masraf-stat-avans,
+  .home-dashboard .masraf-stat-maas {
+    grid-column: span 6;
+  }
+
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .home-dashboard .masraf-stat-kayit,
+  .home-dashboard .masraf-stat-uyari,
+  .home-dashboard .masraf-stat-avans,
+  .home-dashboard .masraf-stat-maas {
+    grid-column: span 12;
+  }
+
+  .home-hero {
+    padding: 1.2rem 1.25rem;
+  }
+
+  .home-hero-actions {
+    width: 100%;
+  }
+
+  .home-hero-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .home-alert-item {
+    flex-wrap: wrap;
+  }
+
+  .home-alert-meta {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .home-activity-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .home-activity-amount {
+    padding-left: 0.15rem;
+  }
+}
+
 .form-actions {
   display: flex;
   gap: 0.5rem;

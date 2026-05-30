@@ -148,7 +148,34 @@ def personel_bakiye_ozeti(personel: Personel, yil: int | None = None, ay: int | 
 
 
 def son_islemler(limit: int = 8):
-    return MuhasebeIslem.objects.select_related("personel", "kaydeden")[:limit]
+    return MuhasebeIslem.objects.select_related("personel", "kaydeden").order_by(
+        "-tarih", "-olusturulma"
+    )[:limit]
+
+
+def anasayfa_ozet(referans: date | None = None) -> dict:
+    """Anasayfa kartları için bu ayın finansal özeti."""
+    referans = referans or timezone.localdate()
+    baslangic, bitis = donem_tarih_araligi(DONEM_AYLIK, referans)
+    qs = MuhasebeIslem.objects.filter(tarih__gte=baslangic, tarih__lte=bitis)
+    sayim = qs.aggregate(
+        kayit=Count("id"),
+        toplam_masraf=Sum("tutar", filter=Q(tip=IslemTipi.MASRAF)),
+        toplam_avans=Sum("tutar", filter=Q(tip=IslemTipi.AVANS)),
+        toplam_maas=Sum("tutar", filter=Q(tip=IslemTipi.MAAS)),
+    )
+    toplam_masraf = sayim["toplam_masraf"] or Decimal("0")
+    toplam_avans = sayim["toplam_avans"] or Decimal("0")
+    toplam_maas = sayim["toplam_maas"] or Decimal("0")
+    return {
+        "bu_ay_etiket": f"{AY_ADLARI[referans.month]} {referans.year}",
+        "donem_araligi": donem_araligi_metin(baslangic, bitis),
+        "aylik_kayit": sayim["kayit"] or 0,
+        "aylik_masraf": toplam_masraf,
+        "aylik_avans": toplam_avans,
+        "aylik_maas": toplam_maas,
+        "aylik_toplam": toplam_masraf + toplam_avans + toplam_maas,
+    }
 
 
 def _onceki_ay(yil: int, ay: int) -> tuple[int, int]:

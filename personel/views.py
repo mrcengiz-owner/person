@@ -21,6 +21,7 @@ from .audit import islem_kaydi_ozeti
 from .models import IslemTipi, MuhasebeIslem, Personel
 from .services import (
     DONEM_SECENEKLERI,
+    anasayfa_ozet,
     donem_araligi_metin,
     donem_dogrula,
     donem_tarih_araligi,
@@ -35,14 +36,19 @@ from .services import (
 
 class AnasayfaView(View):
     def get(self, request):
+        bugun = timezone.localdate()
         aktif_sayisi = Personel.objects.filter(aktif=True).count()
+        toplam_personel = Personel.objects.count()
         uyarılar = yaklasan_maas_personelleri()
+        ozet = anasayfa_ozet(bugun)
         context = {
             "aktif_personel_sayisi": aktif_sayisi,
+            "toplam_personel_sayisi": toplam_personel,
             "maas_uyarilari": uyarılar,
             "maas_uyari_gun": getattr(settings, "MAAS_UYARI_GUN", 3),
             "son_islemler": son_islemler(),
-            "bugun": timezone.localdate(),
+            "bugun": bugun,
+            "ozet": ozet,
         }
         return render(request, "personel/anasayfa.html", context)
 

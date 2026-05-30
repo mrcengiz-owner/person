@@ -774,6 +774,32 @@ tr.row-warning {
   border: 1px solid var(--border);
 }
 
+.btn-danger-ghost {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid transparent;
+}
+
+.btn-danger-ghost:hover {
+  background: var(--danger-bg);
+  border-color: rgba(220, 38, 38, 0.25);
+  color: var(--danger);
+  text-decoration: none;
+}
+
+.actions-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.islem-sil-form {
+  display: inline;
+  margin: 0;
+}
+
 .btn-sm {
   padding: 0.35rem 0.65rem;
   font-size: 0.8rem;
@@ -1429,6 +1455,115 @@ tr.row-warning {
   border-radius: 50%;
   background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, transparent 70%);
   pointer-events: none;
+}
+
+.masraf-stats-grid-masraf {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.masraf-stats-grid-masraf .masraf-stat-hero {
+  grid-column: span 6;
+}
+
+.masraf-stats-grid-masraf .masraf-stat-kayit,
+.masraf-stats-grid-masraf .masraf-stat-accent {
+  grid-column: span 3;
+}
+
+.masraf-stats-grid-avans,
+.masraf-stats-grid-maas {
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.masraf-stats-grid-avans .masraf-stat-avans-hero,
+.masraf-stats-grid-maas .masraf-stat-maas-hero {
+  grid-column: span 6;
+}
+
+.masraf-stats-grid-avans .masraf-stat-kayit,
+.masraf-stats-grid-avans .masraf-stat-avans,
+.masraf-stats-grid-avans .masraf-stat-accent,
+.masraf-stats-grid-maas .masraf-stat-kayit,
+.masraf-stats-grid-maas .masraf-stat-maas,
+.masraf-stats-grid-maas .masraf-stat-accent {
+  grid-column: span 2;
+}
+
+.masraf-stat-avans-hero {
+  border-color: rgba(2, 132, 199, 0.35);
+  background: linear-gradient(145deg, #eff6ff 0%, #ffffff 45%, #dbeafe 100%);
+}
+
+.masraf-stat-maas-hero {
+  border-color: rgba(5, 150, 105, 0.35);
+  background: linear-gradient(145deg, #ecfdf5 0%, #ffffff 45%, #d1fae5 100%);
+}
+
+.masraf-stat-value-info {
+  background: linear-gradient(135deg, #0369a1 0%, #0284c7 50%, #0ea5e9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.masraf-stat-value-success {
+  background: linear-gradient(135deg, #047857 0%, #059669 50%, #10b981 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.masraf-stat-value-sm {
+  font-size: 1.35rem;
+}
+
+.masraf-stat-glow-info {
+  background: radial-gradient(circle, rgba(2, 132, 199, 0.18) 0%, transparent 70%);
+}
+
+.masraf-stat-glow-success {
+  background: radial-gradient(circle, rgba(5, 150, 105, 0.18) 0%, transparent 70%);
+}
+
+.masraf-stat-avans-hero .masraf-stat-icon {
+  background: var(--gradient-info);
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3);
+}
+
+.masraf-stat-maas-hero .masraf-stat-icon {
+  background: var(--gradient-success);
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+}
+
+.home-panel-compact {
+  margin-bottom: 1rem;
+}
+
+.home-panel-compact .card-header {
+  margin-bottom: 0.75rem;
+}
+
+.home-panel-compact .home-alert-list {
+  gap: 0.5rem;
+}
+
+@media (max-width: 1100px) {
+  .masraf-stats-grid-masraf .masraf-stat-hero,
+  .masraf-stats-grid-avans .masraf-stat-avans-hero,
+  .masraf-stats-grid-maas .masraf-stat-maas-hero {
+    grid-column: span 12;
+  }
+
+  .masraf-stats-grid-masraf .masraf-stat-kayit,
+  .masraf-stats-grid-masraf .masraf-stat-accent,
+  .masraf-stats-grid-avans .masraf-stat-kayit,
+  .masraf-stats-grid-avans .masraf-stat-avans,
+  .masraf-stats-grid-avans .masraf-stat-accent,
+  .masraf-stats-grid-maas .masraf-stat-kayit,
+  .masraf-stats-grid-maas .masraf-stat-maas,
+  .masraf-stats-grid-maas .masraf-stat-accent {
+    grid-column: span 6;
+  }
 }
 
 @media (max-width: 1100px) {

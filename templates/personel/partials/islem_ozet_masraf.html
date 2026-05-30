@@ -1,0 +1,40 @@
+{% load personel_extras %}
+<div class="masraf-dashboard">
+  <div class="masraf-stats-grid masraf-stats-grid-masraf">
+    <article class="masraf-stat masraf-stat-hero masraf-stat-masraf">
+      <div class="masraf-stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4V4Zm0 4h10v2H4V8Zm0 4h16v2H4v-2Zm0 4h10v2H4v-2Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Toplam Masraf</span>
+        <strong class="masraf-stat-value">{{ filtre_toplam|para }}</strong>
+        <span class="masraf-stat-meta">{{ toplam_kayit }} kayıt · {{ donem_araligi }}</span>
+      </div>
+      <div class="masraf-stat-glow" aria-hidden="true"></div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-kayit">
+      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14l-7-3-7 3V5a2 2 0 0 1 2-2Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Kayıt Sayısı</span>
+        <strong class="masraf-stat-value masraf-stat-value-num">{{ toplam_kayit }}</strong>
+        <span class="masraf-stat-meta">Seçili dönem</span>
+      </div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-accent masraf-stat-odeme">
+      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm-1 15h2v2h-2v-2Zm0-4h2V7h-2v6Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Ortalama Masraf</span>
+        <strong class="masraf-stat-value masraf-stat-value-sm">
+          {% if ortalama_tutar %}{{ ortalama_tutar|para }}{% else %}—{% endif %}
+        </strong>
+        <span class="masraf-stat-meta">Kayıt başına (₺)</span>
+      </div>
+    </article>
+  </div>
+</div>

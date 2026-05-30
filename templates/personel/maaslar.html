@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load personel_extras %}
+
+{% block title %}Maaşlar{% endblock %}
+{% block page_title %}Maaşlar{% endblock %}
+
+{% block content %}
+{% include "personel/partials/islem_donem_sekmeleri.html" %}
+{% include "personel/partials/islem_ozet_maas.html" %}
+
+{% if maas_uyarilari %}
+<section class="card card-alert home-panel-compact">
+  <div class="card-header">
+    <div>
+      <h2>Maaşı Yaklaşan Personeller</h2>
+      <p class="home-panel-sub">{{ maas_uyarilari|length }} personel için ödeme tarihi yaklaşıyor</p>
+    </div>
+    <span class="badge badge-warning">{{ maas_uyarilari|length }} uyarı</span>
+  </div>
+  <ul class="home-alert-list">
+    {% for u in maas_uyarilari %}
+    <li class="home-alert-item">
+      <span class="home-alert-avatar" aria-hidden="true">{{ u.personel.ad_soyad|slice:":1"|upper }}</span>
+      <div class="home-alert-body">
+        <strong>{{ u.personel.ad_soyad }}</strong>
+        <span>{{ u.personel.maas|para }} · Ödeme {{ u.sonraki_maas|date:"d.m.Y" }}</span>
+      </div>
+      <div class="home-alert-meta">
+        {% if u.kalan_gun == 0 %}
+          <span class="badge badge-danger">Bugün</span>
+        {% else %}
+          <span class="badge badge-warning">{{ u.kalan_gun }} gün</span>
+        {% endif %}
+        <a href="{% url 'maas_yeni' %}?personel={{ u.personel.pk }}" class="btn btn-sm btn-primary">Maaş Öde</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<div class="liste-toolbar islem-toolbar">
+  <a href="{% url 'maas_yeni' %}?donem={{ secili_donem }}" class="btn btn-primary">+ Maaş Öde</a>
+</div>
+
+<section class="card">
+  <div class="card-header-inline">
+    <p class="card-subtitle">Personele yapılan tüm maaş ödemeleri.</p>
+  </div>
+  {% include "personel/partials/islem_filtre.html" with liste_url="maaslar" %}
+  {% include "personel/partials/islem_tablo.html" %}
+</section>
+
+{% include "personel/partials/personel_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/personel-liste.js' %}"></script>
+{% endblock %}

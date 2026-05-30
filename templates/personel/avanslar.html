@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 {% load personel_extras %}
 
-{% block title %}Masraflar{% endblock %}
-{% block page_title %}Masraflar{% endblock %}
+{% block title %}Avanslar{% endblock %}
+{% block page_title %}Avanslar{% endblock %}
 
 {% block content %}
 {% include "personel/partials/islem_donem_sekmeleri.html" %}
-{% include "personel/partials/islem_ozet_masraf.html" %}
+{% include "personel/partials/islem_ozet_avans.html" %}
 
 <div class="liste-toolbar islem-toolbar">
-  <a href="{% url 'odeme_kayit' %}?donem={{ secili_donem }}" class="btn btn-primary">+ Masraf Ekle</a>
+  <a href="{% url 'avans_yeni' %}?donem={{ secili_donem }}" class="btn btn-primary">+ Avans Ver</a>
 </div>
 
 <section class="card">
   <div class="card-header-inline">
-    <p class="card-subtitle">Yalnızca masraf kayıtları listelenir. Avans ve maaş için ilgili menüleri kullanın.</p>
+    <p class="card-subtitle">Personele verilen tüm avans ödemeleri. Yeni avans kaydı menüden veya yukarıdaki butondan eklenir.</p>
   </div>
-  {% include "personel/partials/islem_filtre.html" with liste_url="masraflar" %}
+  {% include "personel/partials/islem_filtre.html" with liste_url="avanslar" %}
   {% include "personel/partials/islem_tablo.html" %}
 </section>
 

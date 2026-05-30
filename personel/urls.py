@@ -24,22 +24,37 @@ urlpatterns = [
     path("muhasebe/islemler/", views.MuhasebeIslemlerView.as_view(), name="muhasebe_islemler"),
     path("muhasebe/masraflar/", views.MasraflarView.as_view(), name="masraflar"),
     path("muhasebe/masraflar/yeni/", views.OdemeKayitView.as_view(), name="odeme_kayit"),
+    path("muhasebe/avanslar/", views.AvanslarView.as_view(), name="avanslar"),
+    path("muhasebe/maaslar/", views.MaaslarView.as_view(), name="maaslar"),
     path(
         "muhasebe/islem/<int:pk>/duzenle/",
         views.IslemDuzenleView.as_view(),
         name="islem_duzenle",
     ),
     path(
-        "muhasebe/avans/",
+        "muhasebe/islem/<int:pk>/sil/",
+        views.IslemSilView.as_view(),
+        name="islem_sil",
+    ),
+    path(
+        "muhasebe/avanslar/yeni/",
         views.IslemFormView.as_view(),
         {"tip": IslemTipi.AVANS},
-        name="muhasebe_avans",
+        name="avans_yeni",
+    ),
+    path(
+        "muhasebe/maaslar/yeni/",
+        views.IslemFormView.as_view(),
+        {"tip": IslemTipi.MAAS},
+        name="maas_yeni",
+    ),
+    path(
+        "muhasebe/avans/",
+        RedirectView.as_view(pattern_name="avans_yeni", permanent=False),
     ),
     path(
         "muhasebe/maas/",
-        views.IslemFormView.as_view(),
-        {"tip": IslemTipi.MAAS},
-        name="muhasebe_maas",
+        RedirectView.as_view(pattern_name="maas_yeni", permanent=False),
     ),
     path(
         "muhasebe/mutabakatlar/",

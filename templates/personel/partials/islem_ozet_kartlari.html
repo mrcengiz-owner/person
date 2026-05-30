@@ -1,0 +1,59 @@
+<div class="masraf-dashboard">
+  <div class="masraf-stats-grid">
+    <article class="masraf-stat masraf-stat-hero masraf-stat-masraf">
+      <div class="masraf-stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16v2H4V4Zm0 4h10v2H4V8Zm0 4h16v2H4v-2Zm0 4h10v2H4v-2Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Toplam Masraf</span>
+        <strong class="masraf-stat-value">{{ toplam_masraf|para }}</strong>
+        <span class="masraf-stat-meta">{{ masraf_adet }} kayıt · {{ donem_araligi }}</span>
+      </div>
+      <div class="masraf-stat-glow" aria-hidden="true"></div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-accent masraf-stat-odeme">
+      <div class="masraf-stat-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2 2 7v2h20V7L12 2Zm8 9H4v9h16v-9ZM6 18v-5h2v5H6Zm4 0v-5h2v5h-2Zm4 0v-5h2v5h-2Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Toplam Ödeme</span>
+        <strong class="masraf-stat-value">{{ filtre_toplam|para }}</strong>
+        <span class="masraf-stat-meta">{{ toplam_kayit }} kayıt · masraf + avans + maaş</span>
+      </div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-kayit">
+      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M7 3h10a2 2 0 0 1 2 2v14l-7-3-7 3V5a2 2 0 0 1 2-2Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Kayıt</span>
+        <strong class="masraf-stat-value masraf-stat-value-num">{{ toplam_kayit }}</strong>
+        <span class="masraf-stat-meta">{{ donem_araligi }}</span>
+      </div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-avans">
+      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Avans</span>
+        <strong class="masraf-stat-value">{{ toplam_avans|para }}</strong>
+        <span class="masraf-stat-meta">{{ avans_adet }} ödeme</span>
+      </div>
+    </article>
+
+    <article class="masraf-stat masraf-stat-maas">
+      <div class="masraf-stat-icon masraf-stat-icon-sm" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm-7 9a7 7 0 0 1 14 0Z" fill="currentColor"/></svg>
+      </div>
+      <div class="masraf-stat-content">
+        <span class="masraf-stat-label">Maaş</span>
+        <strong class="masraf-stat-value">{{ toplam_maas|para }}</strong>
+        <span class="masraf-stat-meta">{{ maas_adet }} ödeme</span>
+      </div>
+    </article>
+  </div>
+</div>

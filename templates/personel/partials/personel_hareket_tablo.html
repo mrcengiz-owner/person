@@ -51,8 +51,18 @@
         <td data-label="Kayıt" class="hareket-audit-cell">
           <span class="audit-meta">{{ i|kayit_ozeti }}</span>
         </td>
-        <td data-label="İşlem" class="col-action actions">
+        <td data-label="İşlem" class="col-action actions actions-split">
           <a href="{% url 'islem_duzenle' i.pk %}{% if edit_next %}?next={{ edit_next|urlencode }}{% endif %}" class="btn btn-sm btn-ghost">Düzenle</a>
+          <form
+            method="post"
+            action="{% url 'islem_sil' i.pk %}"
+            class="islem-sil-form"
+            onsubmit="return confirm('{{ i.alici_goster|escapejs }} — {{ i.get_tip_display|escapejs }} kaydını silmek istediğinize emin misiniz?');"
+          >
+            {% csrf_token %}
+            {% if edit_next %}<input type="hidden" name="next" value="{{ edit_next }}">{% endif %}
+            <button type="submit" class="btn btn-sm btn-danger-ghost">Sil</button>
+          </form>
         </td>
       </tr>
       {% endfor %}

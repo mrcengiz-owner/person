@@ -1,7 +1,5 @@
 from django.conf import settings
 from django.contrib import messages
-from django.core.paginator import Paginator
-from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -20,11 +18,13 @@ from .forms import (
 from .audit import islem_kaydi_ozeti
 from .models import IslemTipi, MuhasebeIslem, Personel
 from .services import (
-    DONEM_SECENEKLERI,
+    DONEM_AYLIK,
+    DONEM_TUMU,
     anasayfa_ozet,
-    donem_araligi_metin,
     donem_dogrula,
-    donem_tarih_araligi,
+    islem_liste_filtrele,
+    islem_liste_query,
+    islem_tip_liste_url,
     maas_tarihi_hesapla,
     maasa_kalan_gun,
     mesai_gorsel_bilgi,
@@ -164,75 +164,22 @@ def _islem_yonlendir(request, islem, varsayilan="muhasebe_islemler"):
     return redirect(varsayilan)
 
 
-def _masraflar_query(request, **overrides):
-    q = request.GET.copy()
-    q.update(overrides)
-    if "page" in q:
-        del q["page"]
-    return q.urlencode()
+def _yonlendir_next(request, varsayilan="masraflar"):
+    next_url = request.POST.get("next") or request.GET.get("next")
+    if next_url and url_has_allowed_host_and_scheme(
+        next_url,
+        allowed_hosts={request.get_host()},
+    ):
+        return redirect(next_url)
+    return redirect(varsayilan)
 
 
 class MuhasebeIslemlerView(View):
     template_name = "personel/muhasebe_islemler.html"
-    sayfa_boyutu = 25
 
     def get(self, request):
-        qs = (
-            MuhasebeIslem.objects.exclude(tip=IslemTipi.MASRAF)
-            .select_related("personel", "kaydeden", "guncelleyen")
-            .order_by("-tarih", "-olusturulma")
-        )
-
-        tip = request.GET.get("tip", "")
-        if tip in (IslemTipi.AVANS, IslemTipi.MAAS):
-            qs = qs.filter(tip=tip)
-
-        personel_id = request.GET.get("personel", "")
-        secili_personel_pk = None
-        if personel_id.isdigit():
-            secili_personel_pk = int(personel_id)
-            qs = qs.filter(personel_id=secili_personel_pk)
-
-        arama = request.GET.get("q", "").strip()
-        if arama:
-            qs = qs.filter(
-                Q(personel__ad_soyad__icontains=arama)
-                | Q(aciklama__icontains=arama)
-            )
-
-        sayim = qs.aggregate(
-            toplam=Count("id"),
-            avans_adet=Count("id", filter=Q(tip=IslemTipi.AVANS)),
-            maas_adet=Count("id", filter=Q(tip=IslemTipi.MAAS)),
-            toplam_avans=Sum("tutar", filter=Q(tip=IslemTipi.AVANS)),
-            toplam_maas=Sum("tutar", filter=Q(tip=IslemTipi.MAAS)),
-        )
-
-        paginator = Paginator(qs, self.sayfa_boyutu)
-        sayfa = paginator.get_page(request.GET.get("page"))
-
-        querystring = request.GET.copy()
-        if "page" in querystring:
-            del querystring["page"]
-
-        return render(
-            request,
-            self.template_name,
-            {
-                "islemler": sayfa,
-                "personeller": Personel.objects.order_by("ad_soyad"),
-                "secili_tip": tip,
-                "secili_personel": secili_personel_pk,
-                "arama": arama,
-                "toplam_kayit": sayim["toplam"],
-                "avans_adet": sayim["avans_adet"],
-                "maas_adet": sayim["maas_adet"],
-                "toplam_avans": sayim["toplam_avans"] or 0,
-                "toplam_maas": sayim["toplam_maas"] or 0,
-                "filtre_toplam": (sayim["toplam_avans"] or 0) + (sayim["toplam_maas"] or 0),
-                "querystring": querystring.urlencode(),
-            },
-        )
+        context = islem_liste_filtrele(request, varsayilan_donem=DONEM_TUMU)
+        return render(request, self.template_name, context)
 
 
 class IslemDuzenleView(View):
@@ -302,6 +249,14 @@ class IslemFormView(View):
     def get_baslik(self, tip):
         return "Avans Kaydı" if tip == IslemTipi.AVANS else "Maaş Ödemesi"
 
+    def _form_context(self, form, tip, donem):
+        return {
+            "form": form,
+            "baslik": self.get_baslik(tip),
+            "iptal_url": islem_tip_liste_url(tip),
+            "secili_donem": donem,
+        }
+
     def get(self, request, tip, **kwargs):
         personel_pk = request.GET.get("personel")
         personel = None
@@ -316,124 +271,87 @@ class IslemFormView(View):
         if personel:
             form.fields["personel"].initial = personel
 
+        donem = donem_dogrula(request.GET.get("donem"), varsayilan=DONEM_AYLIK)
         return render(
             request,
             self.get_template(tip),
-            {
-                "form": form,
-                "baslik": self.get_baslik(tip),
-                "iptal_url": "muhasebe_islemler",
-            },
+            self._form_context(form, tip, donem),
         )
 
     def post(self, request, tip, **kwargs):
         form_class = self.get_form_class(tip)
         form = form_class(request.POST)
+        donem = donem_dogrula(
+            request.POST.get("donem") or request.GET.get("donem"),
+            varsayilan=DONEM_AYLIK,
+        )
         if form.is_valid():
             islem = form.save(commit=False)
             islem.kaydeden = request.user
             islem.guncelleyen = request.user
             islem.save()
             messages.success(request, _islem_basarili_mesaj(islem))
-            return _islem_yonlendir(request, islem)
+            next_url = request.POST.get("next") or request.GET.get("next")
+            if next_url and url_has_allowed_host_and_scheme(
+                next_url,
+                allowed_hosts={request.get_host()},
+            ):
+                return redirect(next_url)
+            liste_url = islem_tip_liste_url(tip)
+            return redirect(f"{reverse(liste_url)}?{islem_liste_query(request, donem=donem)}")
         return render(
             request,
             self.get_template(tip),
-            {
-                "form": form,
-                "baslik": self.get_baslik(tip),
-                "iptal_url": "muhasebe_islemler",
-            },
+            self._form_context(form, tip, donem),
         )
 
 
 class MasraflarView(View):
     template_name = "personel/masraflar.html"
-    sayfa_boyutu = 25
 
     def get(self, request):
-        bugun = timezone.localdate()
-        secili_donem = donem_dogrula(request.GET.get("donem", ""))
-        baslangic, bitis = donem_tarih_araligi(secili_donem, bugun)
-
-        qs = (
-            MuhasebeIslem.objects.filter(tarih__gte=baslangic, tarih__lte=bitis)
-            .select_related("personel", "kaydeden", "guncelleyen")
-            .order_by("-tarih", "-olusturulma")
-        )
-
-        tip = request.GET.get("tip", "")
-        if tip in dict(IslemTipi.choices):
-            qs = qs.filter(tip=tip)
-
-        personel_id = request.GET.get("personel", "")
-        secili_personel_pk = None
-        if personel_id.isdigit():
-            secili_personel_pk = int(personel_id)
-            qs = qs.filter(personel_id=secili_personel_pk)
-
-        arama = request.GET.get("q", "").strip()
-        if arama:
-            qs = qs.filter(
-                Q(personel__ad_soyad__icontains=arama)
-                | Q(alici_adi__icontains=arama)
-                | Q(aciklama__icontains=arama)
-            )
-
-        sayim = qs.aggregate(
-            toplam=Count("id"),
-            masraf_adet=Count("id", filter=Q(tip=IslemTipi.MASRAF)),
-            avans_adet=Count("id", filter=Q(tip=IslemTipi.AVANS)),
-            maas_adet=Count("id", filter=Q(tip=IslemTipi.MAAS)),
-            toplam_masraf=Sum("tutar", filter=Q(tip=IslemTipi.MASRAF)),
-            toplam_avans=Sum("tutar", filter=Q(tip=IslemTipi.AVANS)),
-            toplam_maas=Sum("tutar", filter=Q(tip=IslemTipi.MAAS)),
-        )
-
-        paginator = Paginator(qs, self.sayfa_boyutu)
-        sayfa = paginator.get_page(request.GET.get("page"))
-
-        querystring = request.GET.copy()
-        if "page" in querystring:
-            del querystring["page"]
-
-        toplam_masraf = sayim["toplam_masraf"] or 0
-        toplam_avans = sayim["toplam_avans"] or 0
-        toplam_maas = sayim["toplam_maas"] or 0
-
-        donem_urls = {
-            anahtar: _masraflar_query(request, donem=anahtar)
-            for anahtar, _ in DONEM_SECENEKLERI
-        }
-        donem_linkleri = [
-            {"anahtar": anahtar, "etiket": etiket, "url": donem_urls[anahtar]}
-            for anahtar, etiket in DONEM_SECENEKLERI
-        ]
-
-        return render(
+        context = islem_liste_filtrele(
             request,
-            self.template_name,
-            {
-                "islemler": sayfa,
-                "personeller": Personel.objects.order_by("ad_soyad"),
-                "secili_tip": tip,
-                "secili_personel": secili_personel_pk,
-                "secili_donem": secili_donem,
-                "donem_secenekleri": DONEM_SECENEKLERI,
-                "donem_linkleri": donem_linkleri,
-                "donem_araligi": donem_araligi_metin(baslangic, bitis),
-                "arama": arama,
-                "toplam_kayit": sayim["toplam"],
-                "masraf_adet": sayim["masraf_adet"],
-                "avans_adet": sayim["avans_adet"],
-                "maas_adet": sayim["maas_adet"],
-                "toplam_masraf": toplam_masraf,
-                "toplam_avans": toplam_avans,
-                "toplam_maas": toplam_maas,
-                "filtre_toplam": toplam_masraf + toplam_avans + toplam_maas,
-                "querystring": querystring.urlencode(),
-            },
+            varsayilan_donem=DONEM_AYLIK,
+            sabit_tip=IslemTipi.MASRAF,
         )
+        return render(request, self.template_name, context)
+
+
+class AvanslarView(View):
+    template_name = "personel/avanslar.html"
+
+    def get(self, request):
+        context = islem_liste_filtrele(
+            request,
+            varsayilan_donem=DONEM_AYLIK,
+            sabit_tip=IslemTipi.AVANS,
+        )
+        return render(request, self.template_name, context)
+
+
+class MaaslarView(View):
+    template_name = "personel/maaslar.html"
+
+    def get(self, request):
+        context = islem_liste_filtrele(
+            request,
+            varsayilan_donem=DONEM_AYLIK,
+            sabit_tip=IslemTipi.MAAS,
+        )
+        context["maas_uyarilari"] = yaklasan_maas_personelleri()
+        context["maas_uyari_gun"] = getattr(settings, "MAAS_UYARI_GUN", 3)
+        return render(request, self.template_name, context)
+
+
+class IslemSilView(View):
+    def post(self, request, pk):
+        islem = get_object_or_404(MuhasebeIslem, pk=pk)
+        mesaj = f"{islem.alici_goster} — {islem.get_tip_display()} silindi."
+        varsayilan = islem_tip_liste_url(islem.tip)
+        islem.delete()
+        messages.success(request, mesaj)
+        return _yonlendir_next(request, varsayilan=varsayilan)
 
 
 class OdemeKayitView(View):
@@ -447,12 +365,15 @@ class OdemeKayitView(View):
         }
 
     def get(self, request):
-        donem = donem_dogrula(request.GET.get("donem", ""))
+        donem = donem_dogrula(request.GET.get("donem"), varsayilan=DONEM_AYLIK)
         form = MasrafKayitForm(initial={"tarih": timezone.localdate()})
         return render(request, self.template_name, self._form_context(form, donem))
 
     def post(self, request):
-        donem = donem_dogrula(request.POST.get("donem") or request.GET.get("donem", ""))
+        donem = donem_dogrula(
+            request.POST.get("donem") or request.GET.get("donem"),
+            varsayilan=DONEM_AYLIK,
+        )
         form = MasrafKayitForm(request.POST)
         if form.is_valid():
             islem = form.save(commit=False)
@@ -460,5 +381,5 @@ class OdemeKayitView(View):
             islem.guncelleyen = request.user
             islem.save()
             messages.success(request, _islem_basarili_mesaj(islem))
-            return redirect(f"{reverse('masraflar')}?{_masraflar_query(request, donem=donem)}")
+            return redirect(f"{reverse('masraflar')}?{islem_liste_query(request, donem=donem)}")
         return render(request, self.template_name, self._form_context(form, donem))

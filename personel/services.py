@@ -9,12 +9,14 @@ from django.utils import timezone
 
 from .models import IslemTipi, MuhasebeIslem, Personel
 
+DONEM_TUMU = "tumu"
 DONEM_GUNLUK = "gunluk"
 DONEM_HAFTALIK = "haftalik"
 DONEM_AYLIK = "aylik"
 DONEM_VARSAYILAN = DONEM_AYLIK
 
 DONEM_SECENEKLERI = (
+    (DONEM_TUMU, "Tümü"),
     (DONEM_GUNLUK, "Günlük"),
     (DONEM_HAFTALIK, "Haftalık"),
     (DONEM_AYLIK, "Aylık"),
@@ -41,18 +43,30 @@ def _ayin_son_gunu(yil: int, ay: int) -> int:
     return calendar.monthrange(yil, ay)[1]
 
 
-def donem_dogrula(donem: str) -> str:
+def donem_dogrula(donem: str | None, varsayilan: str = DONEM_VARSAYILAN) -> str:
+    if not donem:
+        return varsayilan
     gecerli = {k for k, _ in DONEM_SECENEKLERI}
-    return donem if donem in gecerli else DONEM_VARSAYILAN
+    return donem if donem in gecerli else varsayilan
+
+
+def islem_liste_query(request, **overrides) -> str:
+    q = request.GET.copy()
+    q.update(overrides)
+    if "page" in q:
+        del q["page"]
+    return q.urlencode()
 
 
 def donem_tarih_araligi(
     donem: str,
     referans: date | None = None,
-) -> tuple[date, date]:
-    """Seçilen periyoda göre tarih aralığı (dahil)."""
+) -> tuple[date | None, date | None]:
+    """Seçilen periyoda göre tarih aralığı (dahil). Tümü için (None, None)."""
     referans = referans or timezone.localdate()
-    donem = donem_dogrula(donem)
+
+    if donem == DONEM_TUMU:
+        return None, None
 
     if donem == DONEM_GUNLUK:
         return referans, referans
@@ -151,6 +165,137 @@ def son_islemler(limit: int = 8):
     return MuhasebeIslem.objects.select_related("personel", "kaydeden").order_by(
         "-tarih", "-olusturulma"
     )[:limit]
+
+
+def islem_liste_filtrele(
+    request,
+    *,
+    varsayilan_donem: str = DONEM_AYLIK,
+    sabit_tip: str | None = None,
+    sayfa_boyutu: int = 25,
+):
+    """Muhasebe liste sayfaları için ortak bağlam. sabit_tip ile yalnızca o tip listelenir."""
+    from django.core.paginator import Paginator
+
+    bugun = timezone.localdate()
+    secili_donem = donem_dogrula(request.GET.get("donem"), varsayilan=varsayilan_donem)
+
+    qs = MuhasebeIslem.objects.select_related(
+        "personel", "kaydeden", "guncelleyen"
+    ).order_by("-tarih", "-olusturulma")
+
+    baslangic, bitis = donem_tarih_araligi(secili_donem, bugun)
+    if baslangic and bitis:
+        qs = qs.filter(tarih__gte=baslangic, tarih__lte=bitis)
+        donem_araligi = donem_araligi_metin(baslangic, bitis)
+    else:
+        donem_araligi = "Tüm zamanlar"
+
+    if sabit_tip:
+        qs = qs.filter(tip=sabit_tip)
+        tip = sabit_tip
+    else:
+        tip = request.GET.get("tip", "")
+        if tip in dict(IslemTipi.choices):
+            qs = qs.filter(tip=tip)
+
+    personel_id = request.GET.get("personel", "")
+    secili_personel_pk = None
+    if personel_id.isdigit():
+        secili_personel_pk = int(personel_id)
+        qs = qs.filter(personel_id=secili_personel_pk)
+
+    arama = request.GET.get("q", "").strip()
+    if arama:
+        qs = qs.filter(
+            Q(personel__ad_soyad__icontains=arama)
+            | Q(alici_adi__icontains=arama)
+            | Q(aciklama__icontains=arama)
+        )
+
+    sayim = qs.aggregate(
+        toplam=Count("id"),
+        masraf_adet=Count("id", filter=Q(tip=IslemTipi.MASRAF)),
+        avans_adet=Count("id", filter=Q(tip=IslemTipi.AVANS)),
+        maas_adet=Count("id", filter=Q(tip=IslemTipi.MAAS)),
+        toplam_masraf=Sum("tutar", filter=Q(tip=IslemTipi.MASRAF)),
+        toplam_avans=Sum("tutar", filter=Q(tip=IslemTipi.AVANS)),
+        toplam_maas=Sum("tutar", filter=Q(tip=IslemTipi.MAAS)),
+    )
+
+    paginator = Paginator(qs, sayfa_boyutu)
+    sayfa = paginator.get_page(request.GET.get("page"))
+
+    querystring = request.GET.copy()
+    if "page" in querystring:
+        del querystring["page"]
+
+    toplam_masraf = sayim["toplam_masraf"] or Decimal("0")
+    toplam_avans = sayim["toplam_avans"] or Decimal("0")
+    toplam_maas = sayim["toplam_maas"] or Decimal("0")
+
+    if sabit_tip == IslemTipi.MASRAF:
+        filtre_toplam = toplam_masraf
+    elif sabit_tip == IslemTipi.AVANS:
+        filtre_toplam = toplam_avans
+    elif sabit_tip == IslemTipi.MAAS:
+        filtre_toplam = toplam_maas
+    else:
+        filtre_toplam = toplam_masraf + toplam_avans + toplam_maas
+
+    donem_linkleri = [
+        {
+            "anahtar": anahtar,
+            "etiket": etiket,
+            "url": islem_liste_query(request, donem=anahtar),
+        }
+        for anahtar, etiket in DONEM_SECENEKLERI
+    ]
+
+    personel_sayisi = None
+    if sabit_tip in (IslemTipi.AVANS, IslemTipi.MAAS):
+        personel_sayisi = qs.values("personel_id").distinct().count()
+
+    ortalama_tutar = None
+    if sayim["toplam"]:
+        ortalama_tutar = filtre_toplam / sayim["toplam"]
+
+    return {
+        "islemler": sayfa,
+        "personeller": Personel.objects.order_by("ad_soyad"),
+        "secili_tip": tip,
+        "sabit_tip": sabit_tip,
+        "goster_tip_kolonu": sabit_tip is None,
+        "goster_tip_filtresi": sabit_tip is None,
+        "liste_modu": sabit_tip or "tumu",
+        "secili_personel": secili_personel_pk,
+        "secili_donem": secili_donem,
+        "donem_linkleri": donem_linkleri,
+        "donem_araligi": donem_araligi,
+        "arama": arama,
+        "toplam_kayit": sayim["toplam"],
+        "masraf_adet": sayim["masraf_adet"],
+        "avans_adet": sayim["avans_adet"],
+        "maas_adet": sayim["maas_adet"],
+        "toplam_masraf": toplam_masraf,
+        "toplam_avans": toplam_avans,
+        "toplam_maas": toplam_maas,
+        "filtre_toplam": filtre_toplam,
+        "personel_sayisi": personel_sayisi,
+        "ortalama_tutar": ortalama_tutar,
+        "querystring": querystring.urlencode(),
+        "filtre_aktif": bool(arama or (tip and not sabit_tip) or secili_personel_pk),
+    }
+
+
+def islem_tip_liste_url(tip: str) -> str:
+    if tip == IslemTipi.MASRAF:
+        return "masraflar"
+    if tip == IslemTipi.AVANS:
+        return "avanslar"
+    if tip == IslemTipi.MAAS:
+        return "maaslar"
+    return "muhasebe_islemler"
 
 
 def anasayfa_ozet(referans: date | None = None) -> dict:

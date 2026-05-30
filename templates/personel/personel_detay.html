@@ -30,8 +30,8 @@
     </div>
     <div class="detail-page-actions">
       <a href="{% url 'personel_duzenle' personel.pk %}" class="btn btn-ghost">Düzenle</a>
-      <a href="{% url 'muhasebe_avans' %}?personel={{ personel.pk }}" class="btn btn-secondary">Avans</a>
-      <a href="{% url 'muhasebe_maas' %}?personel={{ personel.pk }}" class="btn btn-primary">Maaş öde</a>
+      <a href="{% url 'avans_yeni' %}?personel={{ personel.pk }}" class="btn btn-secondary">Avans</a>
+      <a href="{% url 'maas_yeni' %}?personel={{ personel.pk }}" class="btn btn-primary">Maaş öde</a>
     </div>
   </div>
 

@@ -1,0 +1,96 @@
+{% load personel_extras %}
+{% if islemler %}
+<div class="table-wrap">
+  <table class="islem-table table-stack">
+    <thead>
+      <tr>
+        <th>Tarih</th>
+        <th>Kime</th>
+        {% if goster_tip_kolonu %}<th>Tip</th>{% endif %}
+        <th>Tutar</th>
+        <th>Açıklama</th>
+        <th>Kayıt</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for i in islemler %}
+      <tr>
+        <td class="tabular-nums" data-label="Tarih">{{ i.tarih|date:"d.m.Y" }}</td>
+        <td class="td-stack-top" data-label="Kime">
+          {% if i.personel_id %}
+          <button
+            type="button"
+            class="personel-name-btn personel-name-btn-inline"
+            data-personel-modal
+            data-url="{% url 'personel_detay_modal' i.personel.pk %}"
+            data-title="{{ i.personel.ad_soyad }}"
+          >
+            {{ i.personel.ad_soyad }}
+          </button>
+          {% else %}
+          <strong>{{ i.alici_adi }}</strong>
+          {% endif %}
+        </td>
+        {% if goster_tip_kolonu %}
+        <td data-label="Tip">
+          {% if i.tip == 'masraf' %}
+            <span class="badge badge-warning">Masraf</span>
+          {% elif i.tip == 'avans' %}
+            <span class="badge badge-info">Avans</span>
+          {% else %}
+            <span class="badge badge-success">Maaş</span>
+          {% endif %}
+        </td>
+        {% endif %}
+        <td class="tabular-nums" data-label="Tutar"><strong>{{ i.tutar|para }}</strong></td>
+        <td class="islem-aciklama" data-label="Açıklama">{{ i.aciklama|default:"—" }}</td>
+        <td data-label="Kayıt"><span class="audit-meta">{{ i|kayit_ozeti }}</span></td>
+        <td class="actions actions-split" data-label="İşlem">
+          <a href="{% url 'islem_duzenle' i.pk %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-ghost">Düzenle</a>
+          <form
+            method="post"
+            action="{% url 'islem_sil' i.pk %}"
+            class="islem-sil-form"
+            onsubmit="return confirm('{{ i.alici_goster|escapejs }} — {{ i.get_tip_display|escapejs }} kaydını silmek istediğinize emin misiniz?');"
+          >
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn btn-sm btn-danger-ghost">Sil</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if islemler.has_other_pages %}
+<nav class="pagination" aria-label="Sayfalama">
+  {% if islemler.has_previous %}
+    <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ islemler.previous_page_number }}" class="btn btn-sm btn-ghost">← Önceki</a>
+  {% endif %}
+  <span class="pagination-info">Sayfa {{ islemler.number }} / {{ islemler.paginator.num_pages }}</span>
+  {% if islemler.has_next %}
+    <a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ islemler.next_page_number }}" class="btn btn-sm btn-ghost">Sonraki →</a>
+  {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<p class="empty-state">
+  {% if liste_modu == 'masraf' %}
+    {% if secili_donem == 'tumu' %}Henüz masraf kaydı yok.{% else %}Bu dönemde masraf kaydı yok.{% endif %}
+  {% elif liste_modu == 'avans' %}
+    {% if secili_donem == 'tumu' %}Henüz avans kaydı yok.{% else %}Bu dönemde avans kaydı yok.{% endif %}
+  {% elif liste_modu == 'maas' %}
+    {% if secili_donem == 'tumu' %}Henüz maaş ödemesi yok.{% else %}Bu dönemde maaş ödemesi yok.{% endif %}
+  {% else %}
+    {% if secili_donem == 'tumu' %}
+    Henüz kayıt yok. Masraf, avans veya maaş ekleyebilirsiniz.
+    {% else %}
+    Bu dönemde kayıt yok. «Tümü» sekmesiyle tüm kayıtları görebilirsiniz.
+    {% endif %}
+  {% endif %}
+</p>
+{% endif %}

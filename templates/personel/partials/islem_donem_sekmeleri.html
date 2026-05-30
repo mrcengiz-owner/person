@@ -1,0 +1,8 @@
+<nav class="donem-tabs" aria-label="Zaman periyodu">
+  {% for link in donem_linkleri %}
+  <a
+    href="?{{ link.url }}"
+    class="donem-tab {% if secili_donem == link.anahtar %}active{% endif %}"
+  >{{ link.etiket }}</a>
+  {% endfor %}
+</nav>

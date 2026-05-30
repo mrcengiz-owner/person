@@ -1,0 +1,25 @@
+<form method="get" class="filter-bar">
+  <input type="hidden" name="donem" value="{{ secili_donem }}">
+  <div class="liste-search filter-search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm8.3 14.7-4.2-4.2a8 8 0 1 0-1.4 1.4l4.2 4.2 1.4-1.4Z" fill="currentColor"/></svg>
+    <input type="search" name="q" value="{{ arama }}" placeholder="Alıcı, personel veya açıklama ara…">
+  </div>
+  {% if goster_tip_filtresi %}
+  <select name="tip" class="filter-select" aria-label="İşlem tipi">
+    <option value="">Tüm tipler</option>
+    <option value="masraf" {% if secili_tip == 'masraf' %}selected{% endif %}>Masraf</option>
+    <option value="avans" {% if secili_tip == 'avans' %}selected{% endif %}>Avans</option>
+    <option value="maas" {% if secili_tip == 'maas' %}selected{% endif %}>Maaş Ödemesi</option>
+  </select>
+  {% endif %}
+  <select name="personel" class="filter-select" aria-label="Personel">
+    <option value="">Tüm personeller</option>
+    {% for p in personeller %}
+    <option value="{{ p.pk }}" {% if secili_personel == p.pk %}selected{% endif %}>{{ p.ad_soyad }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn btn-secondary">Filtrele</button>
+  {% if filtre_aktif %}
+  <a href="{% url liste_url %}?donem={{ secili_donem }}" class="btn btn-ghost">Temizle</a>
+  {% endif %}
+</form>

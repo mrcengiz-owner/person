@@ -7,6 +7,7 @@
 <section class="card card-form">
   <form method="post" novalidate>
     {% csrf_token %}
+    {% if secili_donem %}<input type="hidden" name="donem" value="{{ secili_donem }}">{% endif %}
     {% block form_extra %}{% endblock %}
     {% if form.non_field_errors %}
       <div class="alert alert-error">{{ form.non_field_errors }}</div>
@@ -31,7 +32,7 @@
     {% block form_actions %}
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Kaydet</button>
-      <a href="{% if iptal_url %}{% url iptal_url %}{% else %}{% url 'muhasebe_islemler' %}{% endif %}" class="btn btn-ghost">İptal</a>
+      <a href="{% if iptal_url %}{% url iptal_url %}{% if secili_donem %}?donem={{ secili_donem }}{% endif %}{% else %}{% url 'muhasebe_islemler' %}{% endif %}" class="btn btn-ghost">İptal</a>
     </div>
     {% endblock %}
   </form>

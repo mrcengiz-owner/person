@@ -52,8 +52,8 @@
           </div>
         </div>
 
-        <div class="nav-group {% if 'muhasebe' in request.resolver_match.url_name or 'islem' in request.resolver_match.url_name or request.resolver_match.url_name == 'mutabakatlar' or request.resolver_match.url_name == 'kasalar' or request.resolver_match.url_name == 'masraflar' or request.resolver_match.url_name == 'odeme_kayit' %}open{% endif %}">
-          <button type="button" class="nav-group-toggle" data-toggle="muhasebe-menu" aria-expanded="{% if 'muhasebe' in request.resolver_match.url_name or 'islem' in request.resolver_match.url_name or request.resolver_match.url_name == 'mutabakatlar' or request.resolver_match.url_name == 'kasalar' or request.resolver_match.url_name == 'masraflar' or request.resolver_match.url_name == 'odeme_kayit' %}true{% else %}false{% endif %}">
+        <div class="nav-group {% if 'muhasebe' in request.resolver_match.url_name or 'islem' in request.resolver_match.url_name or request.resolver_match.url_name == 'mutabakatlar' or request.resolver_match.url_name == 'kasalar' or request.resolver_match.url_name == 'masraflar' or request.resolver_match.url_name == 'avanslar' or request.resolver_match.url_name == 'maaslar' or request.resolver_match.url_name == 'odeme_kayit' or request.resolver_match.url_name == 'avans_yeni' or request.resolver_match.url_name == 'maas_yeni' %}open{% endif %}">
+          <button type="button" class="nav-group-toggle" data-toggle="muhasebe-menu" aria-expanded="{% if 'muhasebe' in request.resolver_match.url_name or 'islem' in request.resolver_match.url_name or request.resolver_match.url_name == 'mutabakatlar' or request.resolver_match.url_name == 'kasalar' or request.resolver_match.url_name == 'masraflar' or request.resolver_match.url_name == 'avanslar' or request.resolver_match.url_name == 'maaslar' or request.resolver_match.url_name == 'odeme_kayit' or request.resolver_match.url_name == 'avans_yeni' or request.resolver_match.url_name == 'maas_yeni' %}true{% else %}false{% endif %}">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4Zm2 2v8h12V8Zm2 2h8v2H8Zm0 4h5v2H8Z"/></svg>
             Muhasebe
             <svg class="chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
@@ -61,10 +61,10 @@
           <div class="nav-submenu" id="muhasebe-menu">
             <a href="{% url 'muhasebe_islemler' %}" class="{% if request.resolver_match.url_name == 'muhasebe_islemler' or request.resolver_match.url_name == 'islem_duzenle' %}active{% endif %}">İşlemler</a>
             <a href="{% url 'masraflar' %}" class="{% if request.resolver_match.url_name == 'masraflar' or request.resolver_match.url_name == 'odeme_kayit' %}active{% endif %}">Masraflar</a>
+            <a href="{% url 'avanslar' %}" class="{% if request.resolver_match.url_name == 'avanslar' or request.resolver_match.url_name == 'avans_yeni' %}active{% endif %}">Avanslar</a>
+            <a href="{% url 'maaslar' %}" class="{% if request.resolver_match.url_name == 'maaslar' or request.resolver_match.url_name == 'maas_yeni' %}active{% endif %}">Maaşlar</a>
             <a href="{% url 'mutabakatlar' %}" class="{% if request.resolver_match.url_name == 'mutabakatlar' %}active{% endif %}">Mutabakatlar</a>
             <a href="{% url 'kasalar' %}" class="{% if request.resolver_match.url_name == 'kasalar' %}active{% endif %}">Kasalar</a>
-            <a href="{% url 'muhasebe_avans' %}" class="{% if request.resolver_match.url_name == 'muhasebe_avans' %}active{% endif %}">Avans Ver</a>
-            <a href="{% url 'muhasebe_maas' %}" class="{% if request.resolver_match.url_name == 'muhasebe_maas' %}active{% endif %}">Maaş Öde</a>
           </div>
         </div>
       </nav>

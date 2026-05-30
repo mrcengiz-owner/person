@@ -62,4 +62,22 @@ urlpatterns = [
         name="mutabakatlar",
     ),
     path("muhasebe/kasalar/", finans_views.KasalarView.as_view(), name="kasalar"),
+    path("muhasebe/kasalar/yeni/", finans_views.KasaYeniView.as_view(), name="kasa_yeni"),
+    path("muhasebe/kasalar/kur/", finans_views.KurOnizlemeView.as_view(), name="kur_onizleme"),
+    path("muhasebe/kasalar/<int:pk>/", finans_views.KasaDetayView.as_view(), name="kasa_detay"),
+    path(
+        "muhasebe/kasalar/<int:pk>/duzenle/",
+        finans_views.KasaDuzenleView.as_view(),
+        name="kasa_duzenle",
+    ),
+    path(
+        "muhasebe/kasalar/<int:pk>/hareket/yeni/",
+        finans_views.KasaHareketYeniView.as_view(),
+        name="kasa_hareket_yeni",
+    ),
+    path(
+        "muhasebe/kasalar/hareket/<int:pk>/sil/",
+        finans_views.KasaHareketSilView.as_view(),
+        name="kasa_hareket_sil",
+    ),
 ]

@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load personel_extras finans_extras %}
+
+{% block title %}{{ baslik }} — {{ kasa.ad }}{% endblock %}
+{% block page_title %}{{ baslik }}{% endblock %}
+
+{% block content %}
+<section class="card card-form">
+  <div class="kasa-hareket-header">
+    <p class="form-intro">
+      <strong>{{ kasa.ad }}</strong> · {{ kasa|para_birimi_etiket }}
+    </p>
+    {% if kasa.para_birimi != "try" %}
+    <div id="kur-onizleme" class="kur-onizleme" data-para-birimi="{{ kasa.para_birimi }}" data-kur-url="{% url 'kur_onizleme' %}">
+      <div class="kur-onizleme-row">
+        <span class="kur-label">Günlük kur</span>
+        <strong id="kur-deger">
+          {% if kur_info.kur_try %}1 {{ kasa.para_birimi|upper }} = {{ kur_info.kur_try|para }}{% else %}Kur yükleniyor…{% endif %}
+        </strong>
+      </div>
+      <div class="kur-onizleme-row">
+        <span class="kur-label">TL karşılığı</span>
+        <strong id="tutar-try-deger">—</strong>
+      </div>
+      <small id="kur-kaynak" class="field-hint">Kaynak: {{ kur_info.kaynak }}</small>
+    </div>
+    {% endif %}
+  </div>
+
+  <form method="post" novalidate id="kasa-hareket-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="form-grid">
+      {% for field in form %}
+      <div class="form-field {% if field.errors %}has-error{% endif %} {% if field.name == 'aciklama' %}full-width{% endif %}">
+        {% if field.is_hidden %}
+          {{ field }}
+        {% else %}
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.name == "kur_try" and kasa.para_birimi != "try" %}
+          <span class="field-hint">Boş bırakılırsa seçilen tarihin kuru otomatik alınır.</span>
+          {% endif %}
+          {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Kaydet</button>
+      <a href="{% url 'kasa_detay' kasa.pk %}" class="btn btn-ghost">İptal</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+{% if kasa.para_birimi != "try" %}
+<script src="{% static 'js/kasa-hareket-form.js' %}"></script>
+{% endif %}
+{% endblock %}

@@ -3598,3 +3598,125 @@ body.modal-open {
     padding: 0 0.25rem;
   }
 }
+
+/* Kasalar */
+.kasa-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.kasa-card {
+  background: var(--gradient-card);
+  border: var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.kasa-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.kasa-card-pasif {
+  opacity: 0.72;
+}
+
+.kasa-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.kasa-card-header h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+}
+
+.kasa-card-header h3 a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.kasa-card-header h3 a:hover {
+  color: var(--primary);
+}
+
+.kasa-card-body {
+  padding: 1rem;
+  flex: 1;
+}
+
+.kasa-bakiye-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.kasa-bakiye strong {
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.kasa-bakiye-alt {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.kasa-card-footer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.masraf-stat-kasa {
+  --stat-accent: #0ea5e9;
+}
+
+.kur-onizleme {
+  background: var(--gradient-primary-soft);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.kur-onizleme-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.25rem 0;
+}
+
+.kur-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.badge-muted {
+  background: rgba(100, 116, 139, 0.15);
+  color: var(--muted);
+}
+
+.btn-danger-text {
+  color: var(--danger);
+}
+
+.btn-danger-text:hover {
+  background: var(--danger-bg);
+}

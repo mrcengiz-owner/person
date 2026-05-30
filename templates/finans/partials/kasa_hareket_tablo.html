@@ -1,0 +1,46 @@
+{% load personel_extras finans_extras %}
+
+{% if hareketler %}
+<div class="table-wrap">
+  <table class="data-table islem-table">
+    <thead>
+      <tr>
+        <th>Tarih</th>
+        <th>Tip</th>
+        <th>Tutar</th>
+        <th>Kur (TRY)</th>
+        <th>TL Karşılığı</th>
+        <th>Açıklama</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in hareketler %}
+      <tr>
+        <td>{{ h.tarih|date:"d.m.Y" }}</td>
+        <td>
+          {% if h.tip == "giris" %}
+          <span class="badge badge-success">Giriş</span>
+          {% else %}
+          <span class="badge badge-danger">Çıkış</span>
+          {% endif %}
+        </td>
+        <td class="num">{{ h.tutar|para_doviz:kasa.para_birimi }}</td>
+        <td class="num">{{ h.kur_try|para_doviz:"try" }}</td>
+        <td class="num">{{ h.tutar_try|para }}</td>
+        <td>{{ h.aciklama|default:"—" }}</td>
+        <td class="actions-cell">
+          <form method="post" action="{% url 'kasa_hareket_sil' h.pk %}" class="inline-form"
+                onsubmit="return confirm('Bu hareketi silmek istediğinize emin misiniz?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost btn-sm btn-danger-text">Sil</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<p class="empty-state">Bu kasada henüz hareket yok.</p>
+{% endif %}

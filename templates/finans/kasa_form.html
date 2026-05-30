@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}{{ baslik }}{% endblock %}
+{% block page_title %}{{ baslik }}{% endblock %}
+
+{% block content %}
+<section class="card card-form">
+  <p class="form-intro">
+    Her kasa tek bir para birimine bağlıdır (TRY, USD, BTC vb.).
+    Kripto kasalarda para girişinde işlem tarihindeki TRY kuru otomatik alınır.
+  </p>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="form-grid">
+      {% for field in form %}
+      <div class="form-field {% if field.errors %}has-error{% endif %} {% if field.name == 'aciklama' or field.name == 'ad' %}full-width{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<span class="field-hint">{{ field.help_text }}</span>{% endif %}
+        {% for error in field.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Kaydet</button>
+      <a href="{% if kasa %}{% url 'kasa_detay' kasa.pk %}{% else %}{% url 'kasalar' %}{% endif %}" class="btn btn-ghost">İptal</a>
+    </div>
+  </form>
+</section>
+{% endblock %}
